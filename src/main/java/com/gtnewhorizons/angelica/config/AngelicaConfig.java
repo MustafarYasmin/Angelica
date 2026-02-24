@@ -20,19 +20,6 @@ public class AngelicaConfig {
     @Config.RequiresWorldRestart
     public static int chunkBuilderThreadCount;
 
-    @Config.Comment("Enable NotFine Options")
-    @Config.DefaultBoolean(false)
-    public static boolean enableNotFineOptions;
-
-    @Config.Comment("Enable Reese's Sodium Options")
-    @Config.DefaultBoolean(true)
-    public static boolean enableReesesSodiumOptions;
-
-    @Config.Comment("Inject BakedModel rendering into some vanilla blocks")
-    @Config.DefaultBoolean(false)
-    @Config.RequiresMcRestart
-    public static boolean injectQPRendering;
-
     @Config.Comment("Enable Angelica's test blocks")
     @Config.DefaultBoolean(false)
     @Config.Ignore()
@@ -83,10 +70,6 @@ public class AngelicaConfig {
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart
     public static boolean enableHudCaching;
-    @Config.Comment("Inject a conditional early return into all RenderGameOverlayEvent receivers; Requires enableHudCaching")
-    @Config.DefaultBoolean(true)
-    @Config.RequiresMcRestart
-    public static boolean enableHudCachingEventTransformer;
 
     @Config.Comment("Enable HUD Caching at runtime. Requires enableHudCaching to be on at startup. [Experimental]")
     @Config.DefaultBoolean(false)

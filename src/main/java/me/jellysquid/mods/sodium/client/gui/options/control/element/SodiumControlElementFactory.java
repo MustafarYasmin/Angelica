@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.gui.options.control.element;
 
-import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlElement;
 import me.jellysquid.mods.sodium.client.gui.options.control.ControlValueFormatter;
@@ -57,22 +56,12 @@ public class SodiumControlElementFactory implements ControlElementFactory {
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if(AngelicaConfig.enableReesesSodiumOptions) {
-                if (this.option.isAvailable() && this.dim.containsCursor(mouseX, mouseY) && (button == 0 || button == 1)) {
-                    this.currentIndex = Math.floorMod(this.currentIndex + (button == 0 ? 1 : -1), this.allowedValues.length);
-                    this.option.setValue(this.allowedValues[this.currentIndex]);
-                    this.playClickSound();
+            if (this.option.isAvailable() && button == 0 && this.dim.containsCursor(mouseX, mouseY)) {
+                this.currentIndex = (this.currentIndex + 1) % this.allowedValues.length;
+                this.option.setValue(this.allowedValues[this.currentIndex]);
+                this.playClickSound();
 
-                    return true;
-                }
-            } else {
-                if (this.option.isAvailable() && button == 0 && this.dim.containsCursor(mouseX, mouseY)) {
-                    this.currentIndex = (this.currentIndex + 1) % this.allowedValues.length;
-                    this.option.setValue(this.allowedValues[this.currentIndex]);
-                    this.playClickSound();
-
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -115,10 +104,10 @@ public class SodiumControlElementFactory implements ControlElementFactory {
         }
 
         private void renderStandaloneValue() {
-            int sliderX = this.sliderBounds.getX();
-            int sliderY = this.sliderBounds.getY();
-            int sliderWidth = this.sliderBounds.getWidth();
-            int sliderHeight = this.sliderBounds.getHeight();
+            int sliderX = this.sliderBounds.x();
+            int sliderY = this.sliderBounds.y();
+            int sliderWidth = this.sliderBounds.width();
+            int sliderHeight = this.sliderBounds.height();
 
             String label = this.formatter.format(this.option.getValue());
             int labelWidth = this.font.getStringWidth(label);
@@ -127,17 +116,17 @@ public class SodiumControlElementFactory implements ControlElementFactory {
         }
 
         private void renderSlider() {
-            int sliderX = this.sliderBounds.getX();
-            int sliderY = this.sliderBounds.getY();
-            int sliderWidth = this.sliderBounds.getWidth();
-            int sliderHeight = this.sliderBounds.getHeight();
+            int sliderX = this.sliderBounds.x();
+            int sliderY = this.sliderBounds.y();
+            int sliderWidth = this.sliderBounds.width();
+            int sliderHeight = this.sliderBounds.height();
 
             this.thumbPosition = this.getThumbPositionForValue(option.getValue());
 
             double thumbOffset = MathHelper.clamp_double((double) (this.getIntValue() - this.min) / this.range * sliderWidth, 0, sliderWidth);
 
             double thumbX = sliderX + thumbOffset - THUMB_WIDTH;
-            double trackY = sliderY + (sliderHeight / 2) - ((double) TRACK_HEIGHT / 2);
+            double trackY = sliderY + (sliderHeight >> 1) - ((double) TRACK_HEIGHT / 2);
 
             this.drawRect(thumbX, sliderY, thumbX + (THUMB_WIDTH * 2), sliderY + sliderHeight, 0xFFFFFFFF);
             this.drawRect(sliderX, trackY, sliderX + sliderWidth, trackY + TRACK_HEIGHT, 0xFFFFFFFF);
@@ -173,7 +162,7 @@ public class SodiumControlElementFactory implements ControlElementFactory {
         }
 
         private void setValueFromMouse(double d) {
-            this.setValue((d - (double) this.sliderBounds.getX()) / (double) this.sliderBounds.getWidth());
+            this.setValue((d - (double) this.sliderBounds.x()) / (double) this.sliderBounds.width());
         }
 
         private void setValue(double d) {
@@ -211,10 +200,10 @@ public class SodiumControlElementFactory implements ControlElementFactory {
         public void render(int mouseX, int mouseY, float delta) {
             super.render(mouseX, mouseY, delta);
 
-            final int x = this.button.getX();
-            final int y = this.button.getY();
-            final int w = x + this.button.getWidth();
-            final int h = y + this.button.getHeight();
+            final int x = this.button.x();
+            final int y = this.button.y();
+            final int w = x + this.button.width();
+            final int h = y + this.button.height();
 
             final boolean enabled = this.option.isAvailable();
             final boolean ticked = enabled && this.option.getValue();

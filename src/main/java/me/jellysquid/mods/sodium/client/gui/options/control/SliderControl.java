@@ -15,7 +15,7 @@ public class SliderControl implements Control<Integer> {
     public SliderControl(Option<Integer> option, int min, int max, int interval, ControlValueFormatter mode) {
         Validate.isTrue(max > min, "The maximum value must be greater than the minimum value");
         Validate.isTrue(interval > 0, "The slider interval must be greater than zero");
-        Validate.isTrue(((max - min) % interval) == 0, "The maximum value must be divisable by the interval");
+        Validate.isTrue(((max - min) % interval) == 0, "The maximum value must be divisible by the interval");
         Validate.notNull(mode, "The slider mode must not be null");
 
         this.option = option;
@@ -31,7 +31,7 @@ public class SliderControl implements Control<Integer> {
     }
 
     @Override
-    public Option<Integer> getOption() {
+    public Option<Integer> option() {
         return this.option;
     }
 

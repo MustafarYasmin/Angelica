@@ -45,7 +45,7 @@ public class CyclingControl<T extends Enum<T>> implements Control<T> {
     }
 
     @Override
-    public Option<T> getOption() {
+    public Option<T> option() {
         return this.option;
     }
 

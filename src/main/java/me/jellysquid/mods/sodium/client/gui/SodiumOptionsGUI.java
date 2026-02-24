@@ -107,7 +107,7 @@ public class SodiumOptionsGUI extends ScrollableGuiScreen {
             }
 
             // Just use the first page for now
-            this.currentPage = this.pages.get(0);
+            this.currentPage = this.pages.getFirst();
         }
 
         this.rebuildGUIPages();

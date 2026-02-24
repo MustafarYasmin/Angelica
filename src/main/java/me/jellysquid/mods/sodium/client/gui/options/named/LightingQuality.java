@@ -1,5 +1,6 @@
 package me.jellysquid.mods.sodium.client.gui.options.named;
 
+import lombok.Getter;
 import net.minecraft.util.MathHelper;
 
 public enum LightingQuality implements NamedState {
@@ -11,6 +12,7 @@ public enum LightingQuality implements NamedState {
 
     private final String name;
 
+    @Getter
     private final int vanilla;
 
     LightingQuality(String name) {
@@ -21,10 +23,6 @@ public enum LightingQuality implements NamedState {
     @Override
     public String getKey() {
         return this.name;
-    }
-
-    public int getVanilla() {
-        return vanilla;
     }
 
     public static LightingQuality fromOrdinal(int ordinal) {

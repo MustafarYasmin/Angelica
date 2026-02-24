@@ -2,7 +2,6 @@ package me.jellysquid.mods.sodium.client.gui.options;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.OptionExtended;
 import me.jellysquid.mods.sodium.client.gui.options.binding.GenericBinding;
 import me.jellysquid.mods.sodium.client.gui.options.binding.OptionBinding;
 import me.jellysquid.mods.sodium.client.gui.options.control.Control;
@@ -17,7 +16,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 
-public class OptionImpl<S, T> implements OptionExtended<T> {
+public class OptionImpl<S, T> implements Option<T> {
     private final OptionStorage<S> storage;
 
     private final OptionBinding<S, T> binding;

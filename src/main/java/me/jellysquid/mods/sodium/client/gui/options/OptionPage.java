@@ -1,7 +1,9 @@
 package me.jellysquid.mods.sodium.client.gui.options;
 
 import com.google.common.collect.ImmutableList;
+import lombok.Getter;
 
+@Getter
 public class OptionPage {
     private final String name;
     private final ImmutableList<OptionGroup> groups;
@@ -18,18 +20,6 @@ public class OptionPage {
         }
 
         this.options = builder.build();
-    }
-
-    public ImmutableList<OptionGroup> getGroups() {
-        return this.groups;
-    }
-
-    public ImmutableList<Option<?>> getOptions() {
-        return this.options;
-    }
-
-    public String getName() {
-        return this.name;
     }
 
 }

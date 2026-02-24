@@ -5,7 +5,7 @@ import me.jellysquid.mods.sodium.client.gui.options.control.element.ControlEleme
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 
 public interface Control<T> {
-    Option<T> getOption();
+    Option<T> option();
 
     ControlElement<T> createElement(Dim2i dim, ControlElementFactory factory);
 

@@ -14,7 +14,6 @@ import org.embeddedt.embeddium.impl.render.chunk.occlusion.AsyncOcclusionMode;
 import java.io.FileReader;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -55,12 +54,6 @@ public class SodiumGameOptions {
     public static class EntityRenderDistance {
         public static double entityRenderDistanceMultiplier = 1.0;
 
-        public static double getRenderDistanceMult() {
-            return entityRenderDistanceMultiplier;
-        }
-        public static void setRenderDistanceMult(double value) {
-            entityRenderDistanceMultiplier = value;
-        }
     }
     public static class QualitySettings {
         public GraphicsQuality grassQuality = GraphicsQuality.DEFAULT;
@@ -121,7 +114,7 @@ public class SodiumGameOptions {
             throw new IOException("Not a directory: " + dir);
         }
 
-        Files.write(this.configPath, GSON.toJson(this).getBytes(StandardCharsets.UTF_8));
+        Files.writeString(this.configPath, GSON.toJson(this));
         if(Iris.enabled) {
             try {
                 if (Iris.getIrisConfig() != null) {

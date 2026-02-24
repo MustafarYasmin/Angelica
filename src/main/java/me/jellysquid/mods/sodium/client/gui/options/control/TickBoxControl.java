@@ -4,12 +4,7 @@ import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.control.element.ControlElementFactory;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
 
-public class TickBoxControl implements Control<Boolean> {
-    private final Option<Boolean> option;
-
-    public TickBoxControl(Option<Boolean> option) {
-        this.option = option;
-    }
+public record TickBoxControl(Option<Boolean> option) implements Control<Boolean> {
 
     @Override
     public ControlElement<Boolean> createElement(Dim2i dim, ControlElementFactory factory) {
@@ -19,11 +14,6 @@ public class TickBoxControl implements Control<Boolean> {
     @Override
     public int getMaxWidth() {
         return 30;
-    }
-
-    @Override
-    public Option<Boolean> getOption() {
-        return this.option;
     }
 
 }

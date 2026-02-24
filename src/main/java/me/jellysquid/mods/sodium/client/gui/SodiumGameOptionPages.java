@@ -5,7 +5,6 @@ import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import jss.notfine.core.Settings;
 import jss.notfine.core.SettingsManager;
-import me.flashyreese.mods.reeses_sodium_options.client.gui.ReeseSodiumVideoOptionsScreen;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -58,7 +57,7 @@ public class SodiumGameOptionPages {
                 .setName(I18n.format("options.iris.shadowDistance"))
                 .setTooltip(I18n.format("options.iris.shadowDistance.sodium_tooltip"))
                 .setControl(option -> new SliderControl(option, 0, 32, 1, ControlValueFormatter.quantity("options.chunks")))
-                .setBinding((options, value) -> {
+                .setBinding((_, value) -> {
                         IrisVideoSettings.shadowDistance = value;
                         try {
                             Iris.getIrisConfig().save();
@@ -66,7 +65,7 @@ public class SodiumGameOptionPages {
                             e.printStackTrace();
                         }
                     },
-                    options -> IrisVideoSettings.getOverriddenShadowDistance(IrisVideoSettings.shadowDistance))
+                    _ -> IrisVideoSettings.getOverriddenShadowDistance(IrisVideoSettings.shadowDistance))
                 .setImpact(OptionImpact.HIGH)
                 .setEnabled(true)
                 .build();
@@ -92,10 +91,7 @@ public class SodiumGameOptionPages {
                         .setBinding((opts, value) -> {
                             opts.guiScale = value;
                             // Resizing our window
-                            if(Minecraft.getMinecraft().currentScreen instanceof ReeseSodiumVideoOptionsScreen oldGui) {
-                                Minecraft.getMinecraft().displayGuiScreen(new ReeseSodiumVideoOptionsScreen(oldGui.prevScreen));
-                            }
-                            else if(Minecraft.getMinecraft().currentScreen instanceof SodiumOptionsGUI oldGui) {
+                            if(Minecraft.getMinecraft().currentScreen instanceof SodiumOptionsGUI oldGui) {
                                 Minecraft.getMinecraft().displayGuiScreen(new SodiumOptionsGUI(oldGui.prevScreen));
                             }
                         }, opts -> opts.guiScale)
@@ -121,9 +117,7 @@ public class SodiumGameOptionPages {
                     .setName(I18n.format("options.angelica.sleepbeforeswap"))
                     .setTooltip(I18n.format("options.angelica.sleepbeforeswap.tooltip"))
                     .setControl(TickBoxControl::new)
-                    .setBinding((opts, value) -> {
-                        AngelicaConfig.sleepBeforeSwap = value;
-                    }, opts -> AngelicaConfig.sleepBeforeSwap)
+                    .setBinding((_, value) -> AngelicaConfig.sleepBeforeSwap = value, _ -> AngelicaConfig.sleepBeforeSwap)
                     .setImpact(OptionImpact.VARIES)
                     .build())
                 .add(OptionImpl.createBuilder(boolean.class, vanillaOpts)
@@ -406,7 +400,7 @@ public class SodiumGameOptionPages {
                         .setTooltip(I18n.format("options.angelica.threadedChunkBuilding.tooltip"))
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.HIGH)
-                        .setBinding((opts, value) -> AngelicaConfig.enableThreadedChunkBuilding = value, opts -> AngelicaConfig.enableThreadedChunkBuilding)
+                        .setBinding((_, value) -> AngelicaConfig.enableThreadedChunkBuilding = value, _ -> AngelicaConfig.enableThreadedChunkBuilding)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build()
                 )
@@ -440,7 +434,7 @@ public class SodiumGameOptionPages {
                         .setTooltip(I18n.format("options.angelica.aggressiveChunkLoading.tooltip"))
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.LOW)
-                        .setBinding((opts, value) -> AngelicaConfig.useVanillaChunkTracking = value, opts -> AngelicaConfig.useVanillaChunkTracking)
+                        .setBinding((_, value) -> AngelicaConfig.useVanillaChunkTracking = value, _ -> AngelicaConfig.useVanillaChunkTracking)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, sodiumOpts)
@@ -460,21 +454,21 @@ public class SodiumGameOptionPages {
                         .setTooltip(I18n.format("options.angelica.hudCaching.tooltip"))
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.MEDIUM)
-                        .setBinding((opts, value) -> AngelicaConfig.hudCachingActive = value, opts -> AngelicaConfig.hudCachingActive)
+                        .setBinding((_, value) -> AngelicaConfig.hudCachingActive = value, _ -> AngelicaConfig.hudCachingActive)
                         .setEnabled(AngelicaConfig.enableHudCaching)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, angelicaOpts)
                         .setName(I18n.format("options.angelica.droppedItemLimit"))
                         .setTooltip(I18n.format("options.angelica.droppedItemLimit.tooltip"))
                         .setControl(option -> new SliderControl(option, 32, 2048, 32, ControlValueFormatter.droppedItemLimitLimit()))
-                        .setBinding((options, value) -> AngelicaConfig.droppedItemLimit = value, options -> AngelicaConfig.droppedItemLimit)
+                        .setBinding((_, value) -> AngelicaConfig.droppedItemLimit = value, _ -> AngelicaConfig.droppedItemLimit)
                         .setImpact(OptionImpact.MEDIUM)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, angelicaOpts)
                         .setName(I18n.format("options.angelica.mobSpawnerRenderDistance"))
                         .setTooltip(I18n.format("options.angelica.mobSpawnerRenderDistance.tooltip"))
                         .setControl(option -> new SliderControl(option, 16, 64, 1, ControlValueFormatter.number()))
-                        .setBinding((options, value) -> AngelicaConfig.mobSpawnerRenderDistance = value, options -> (int) AngelicaConfig.mobSpawnerRenderDistance)
+                        .setBinding((_, value) -> AngelicaConfig.mobSpawnerRenderDistance = value, _ -> (int) AngelicaConfig.mobSpawnerRenderDistance)
                         .setImpact(OptionImpact.MEDIUM)
                         .build())
                 .add(OptionImpl.createBuilder(int.class, angelicaOpts)
@@ -482,7 +476,7 @@ public class SodiumGameOptionPages {
                         .setTooltip(I18n.format("options.angelica.itemdisplaylistcount.tooltip"))
                         .setControl(o -> new SliderControl(o, 256, 1024, 16, ControlValueFormatter.number()))
                         .setImpact(OptionImpact.MEDIUM)
-                        .setBinding((opts, value) -> AngelicaConfig.itemRendererCacheSize = value, options -> AngelicaConfig.itemRendererCacheSize)
+                        .setBinding((_, value) -> AngelicaConfig.itemRendererCacheSize = value, _ -> AngelicaConfig.itemRendererCacheSize)
                         .build())
                 .build());
 
@@ -518,7 +512,7 @@ public class SodiumGameOptionPages {
                         .setName(I18n.format("options.angelica.disablef3"))
                         .setTooltip(I18n.format("options.angelica.disablef3.tooltip"))
                         .setControl(TickBoxControl::new)
-                        .setBinding((opts, value) -> AngelicaConfig.disableF3Additions = value, opts -> AngelicaConfig.disableF3Additions)
+                        .setBinding((_, value) -> AngelicaConfig.disableF3Additions = value, _ -> AngelicaConfig.disableF3Additions)
                         .build())
                 .build());
 
@@ -534,7 +528,7 @@ public class SodiumGameOptionPages {
                         .setTooltip(I18n.format("sodium.options.use_gl_state_cache.tooltip"))
                         .setControl(TickBoxControl::new)
                         .setImpact(OptionImpact.EXTREME)
-                        .setBinding((opts, value) -> GLStateManager.BYPASS_CACHE = !value, opts -> !GLStateManager.BYPASS_CACHE)
+                        .setBinding((_, value) -> GLStateManager.BYPASS_CACHE = !value, _ -> !GLStateManager.BYPASS_CACHE)
                         .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                         .build())
                 .build());
