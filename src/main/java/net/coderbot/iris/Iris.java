@@ -1,20 +1,14 @@
 package net.coderbot.iris;
 
 import com.google.common.base.Throwables;
-import com.gtnewhorizon.gtnhlib.client.renderer.CapturingTessellator;
-import com.gtnewhorizon.gtnhlib.client.renderer.TessellatorManager;
 import com.gtnewhorizons.angelica.AngelicaMod;
 import com.gtnewhorizons.angelica.Tags;
 import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectMap;
 import lombok.Getter;
 import net.coderbot.iris.block_rendering.BlockRenderingSettings;
-import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import net.coderbot.iris.celeritas.IrisCeleritasShaderProvider;
 import com.gtnewhorizons.angelica.rendering.celeritas.api.IrisShaderProviderHolder;
 import net.coderbot.iris.config.IrisConfig;
@@ -27,17 +21,12 @@ import net.coderbot.iris.gbuffer_overrides.matching.InputAvailability;
 import net.coderbot.iris.pipeline.FixedFunctionWorldRenderingPipeline;
 import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import net.coderbot.iris.shaderpack.OptionalBoolean;
 import net.coderbot.iris.shaderpack.ProgramSet;
 import net.coderbot.iris.shaderpack.ShaderPack;
 import net.coderbot.iris.shaderpack.discovery.ShaderpackDirectoryManager;
-import net.coderbot.iris.shaderpack.option.OptionSet;
 import net.coderbot.iris.shaderpack.option.Profile;
 import net.coderbot.iris.shaderpack.option.values.MutableOptionValues;
-import net.coderbot.iris.shaderpack.option.values.OptionValues;
-import net.coderbot.iris.block_context.BlockContextHolder;
 import net.coderbot.iris.texture.pbr.PBRTextureManager;
-import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -45,7 +34,6 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.launchwrapper.Launch;
 import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumChatFormatting;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.input.Keyboard;
 
@@ -74,7 +62,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.zip.ZipError;
 import java.util.zip.ZipException;
 
 public class Iris {
@@ -448,7 +435,7 @@ public class Iris {
         // Attempt to load an external shaderpack if it is available
         final Optional<String> externalName = irisConfig.getShaderPackName();
 
-        if (!externalName.isPresent()) {
+        if (externalName.isEmpty()) {
             logger.info("Shaders are disabled because no valid shaderpack is selected");
 
             setShadersDisabled();
@@ -650,7 +637,7 @@ public class Iris {
                 try (Stream<Path> stream = Files.walk(root)) {
                     return stream.filter(Files::isDirectory).anyMatch(path -> path.endsWith("shaders"));
                 }
-            } catch (ZipError zipError) {
+            } catch (ZipException zipException) {
                 // Java 8 seems to throw a ZipError instead of a subclass of IOException
                 Iris.logger.warn("The ZIP at " + pack + " is corrupt");
             } catch (IOException ignored) {
@@ -663,33 +650,6 @@ public class Iris {
 
     public static void queueShaderPackOptionsFromProfile(Profile profile) {
         getShaderPackOptionQueue().putAll(profile.optionValues);
-    }
-
-    public static void queueShaderPackOptionsFromProperties(Properties properties) {
-        queueDefaultShaderPackOptionValues();
-
-        properties.stringPropertyNames().forEach(key -> getShaderPackOptionQueue().put(key, properties.getProperty(key)));
-    }
-
-    // Used in favor of resetShaderPackOptions as the aforementioned requires the pack to be reloaded
-    public static void queueDefaultShaderPackOptionValues() {
-        clearShaderPackOptionQueue();
-
-        getCurrentPack().ifPresent(pack -> {
-            final OptionSet options = pack.getShaderPackOptions().getOptionSet();
-            final OptionValues values = pack.getShaderPackOptions().getOptionValues();
-
-            options.getStringOptions().forEach((key, mOpt) -> {
-                if (values.getStringValue(key).isPresent()) {
-                    getShaderPackOptionQueue().put(key, mOpt.getOption().getDefaultValue());
-                }
-            });
-            options.getBooleanOptions().forEach((key, mOpt) -> {
-                if (values.getBooleanValue(key) != OptionalBoolean.DEFAULT) {
-                    getShaderPackOptionQueue().put(key, Boolean.toString(mOpt.getOption().getDefaultValue()));
-                }
-            });
-        });
     }
 
     public static void clearShaderPackOptionQueue() {
@@ -835,24 +795,6 @@ public class Iris {
         return IRIS_VERSION;
     }
 
-    public static String getFormattedVersion() {
-        final EnumChatFormatting color;
-        String version = getVersion();
-
-        if (version.endsWith("-development-environment")) {
-            color = EnumChatFormatting.GOLD;
-            version = version.replace("-development-environment", " (Development Environment)");
-        } else if (version.endsWith("-dirty") || version.contains("unknown") || version.endsWith("-nogit")) {
-            color = EnumChatFormatting.RED;
-        } else if (version.contains("+rev.")) {
-            color = EnumChatFormatting.LIGHT_PURPLE;
-        } else {
-            color = EnumChatFormatting.GREEN;
-        }
-
-        return color + version;
-    }
-
     public static Path getShaderpacksDirectory() {
         if (shaderpacksDirectory == null) {
             shaderpacksDirectory = Minecraft.getMinecraft().mcDataDir.toPath().resolve("shaderpacks");
@@ -880,35 +822,4 @@ public class Iris {
         ClientRegistry.registerKeyBinding(shaderpackScreenKeybind);
     }
 
-    static BlockContextHolder contextHolder;
-
-    private static int getShaderMaterialOverrideId(Block block, int meta) {
-        if (contextHolder == null) {
-            final Reference2ObjectMap<Block, Int2IntMap> blockMetaMatches = BlockRenderingSettings.INSTANCE.getBlockMetaMatches();
-            if (blockMetaMatches == null) {
-                return -1;
-            }
-            contextHolder = new BlockContextHolder(blockMetaMatches);
-
-        }
-        contextHolder.set(block, meta, (short) block.getRenderType());
-        return contextHolder.blockId;
-    }
-
-    public static void setShaderMaterialOverride(Block block, int meta) {
-        if (!enabled)
-            return;
-
-        int blockId = getShaderMaterialOverrideId(block, meta);
-
-        if (TessellatorManager.get() instanceof CapturingTessellator tess)
-            tess.setShaderBlockId(blockId);
-    }
-
-    public static void resetShaderMaterialOverride() {
-        if (!enabled)
-            return;
-        if (TessellatorManager.get() instanceof CapturingTessellator tess)
-            tess.setShaderBlockId(-1);
-    }
 }
