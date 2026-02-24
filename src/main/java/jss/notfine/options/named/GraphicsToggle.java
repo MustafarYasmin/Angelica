@@ -1,15 +1,15 @@
-package jss.notfine.gui.options.named;
+package jss.notfine.options.named;
 
 import me.jellysquid.mods.sodium.client.gui.options.named.NamedState;
 
-public enum AlwaysNever implements NamedState {
+public enum GraphicsToggle implements NamedState {
     DEFAULT("generator.default"),
-    ALWAYS("options.stream.chat.enabled.always"),
-    NEVER("options.stream.chat.enabled.never");
+    ON("options.on"),
+    OFF("options.off");
 
     private final String name;
 
-    AlwaysNever(String name) {
+    GraphicsToggle(String name) {
         this.name = name;
     }
 

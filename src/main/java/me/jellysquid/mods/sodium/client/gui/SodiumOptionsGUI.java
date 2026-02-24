@@ -6,7 +6,6 @@ import com.gtnewhorizons.angelica.client.gui.ScrollableGuiScreen;
 import com.gtnewhorizons.angelica.compat.mojang.Drawable;
 import com.gtnewhorizons.angelica.compat.mojang.Element;
 import com.gtnewhorizons.angelica.dynamiclights.DynamicLights;
-import jss.notfine.gui.GuiCustomMenu;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
 import me.jellysquid.mods.sodium.client.gui.options.OptionGroup;
@@ -292,17 +291,8 @@ public class SodiumOptionsGUI extends ScrollableGuiScreen {
 
     @Override
     public void keyTyped(char typedChar, int keyCode) {
-        if(keyCode == Keyboard.KEY_ESCAPE && !shouldCloseOnEsc()) {
-            return;
-        } else if (keyCode == Keyboard.KEY_ESCAPE) {
+        if(keyCode == Keyboard.KEY_ESCAPE && shouldCloseOnEsc()) {
             onClose();
-            return;
-        }
-
-        if (keyCode == Keyboard.KEY_P && isShiftKeyDown()) {
-            this.mc.displayGuiScreen(new GuiCustomMenu(this.prevScreen, SodiumGameOptionPages.general(),
-                SodiumGameOptionPages.quality(), SodiumGameOptionPages.advanced(), SodiumGameOptionPages.performance(),
-                SodiumGameOptionPages.appearance(), SodiumGameOptionPages.debug()));
         }
     }
 

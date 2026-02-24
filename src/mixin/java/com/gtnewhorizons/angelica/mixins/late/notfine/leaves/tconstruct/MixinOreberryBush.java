@@ -2,7 +2,7 @@ package com.gtnewhorizons.angelica.mixins.late.notfine.leaves.tconstruct;
 
 import jss.notfine.core.Settings;
 import jss.notfine.core.SettingsManager;
-import jss.notfine.gui.options.named.LeavesQuality;
+import jss.notfine.options.named.LeavesQuality;
 import jss.notfine.util.IFaceObstructionCheckHelper;
 import jss.notfine.util.ILeafBlock;
 import jss.notfine.util.LeafRenderUtil;

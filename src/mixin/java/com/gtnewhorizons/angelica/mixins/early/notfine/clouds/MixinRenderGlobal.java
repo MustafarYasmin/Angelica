@@ -2,7 +2,7 @@ package com.gtnewhorizons.angelica.mixins.early.notfine.clouds;
 
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import jss.notfine.core.Settings;
-import jss.notfine.gui.options.named.GraphicsQualityOff;
+import jss.notfine.options.named.GraphicsQualityOff;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.EntityRenderer;

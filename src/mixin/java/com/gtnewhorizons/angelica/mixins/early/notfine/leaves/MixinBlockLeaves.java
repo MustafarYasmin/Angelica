@@ -2,7 +2,7 @@ package com.gtnewhorizons.angelica.mixins.early.notfine.leaves;
 
 import jss.notfine.core.Settings;
 import jss.notfine.core.SettingsManager;
-import jss.notfine.gui.options.named.LeavesQuality;
+import jss.notfine.options.named.LeavesQuality;
 import jss.notfine.util.ILeafBlock;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockLeavesBase;

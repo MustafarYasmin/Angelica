@@ -7,15 +7,15 @@ import com.gtnewhorizons.angelica.dynamiclights.DynamicLights;
 import com.gtnewhorizons.angelica.dynamiclights.DynamicLightsMode;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
-import jss.notfine.gui.options.control.NotFineControlValueFormatter;
-import jss.notfine.gui.options.named.AlwaysNever;
-import jss.notfine.gui.options.named.BackgroundSelect;
-import jss.notfine.gui.options.named.DownfallQuality;
-import jss.notfine.gui.options.named.GraphicsQualityOff;
-import jss.notfine.gui.options.named.LeavesQuality;
-import jss.notfine.gui.options.named.GraphicsToggle;
+import jss.notfine.options.named.AlwaysNever;
+import jss.notfine.options.named.BackgroundSelect;
+import jss.notfine.options.named.DownfallQuality;
+import jss.notfine.options.named.GraphicsQualityOff;
+import jss.notfine.options.named.LeavesQuality;
+import jss.notfine.options.named.GraphicsToggle;
 import jss.notfine.render.RenderStars;
-import jss.notfine.gui.options.storage.NotFineMinecraftOptionsStorage;
+import jss.notfine.options.storage.NotFineMinecraftOptionsStorage;
+import lombok.Getter;
 import me.jellysquid.mods.sodium.client.gui.options.Option;
 import me.jellysquid.mods.sodium.client.gui.options.OptionFlag;
 import me.jellysquid.mods.sodium.client.gui.options.OptionImpact;
@@ -243,7 +243,7 @@ public enum Settings {
 
         @Override
         public Control<Integer> getControl() {
-            return new SliderControl(this, min, max, step, NotFineControlValueFormatter.percentage());
+            return new SliderControl(this, min, max, step, (value1) -> value1 + "%");
         }
 
     }
@@ -274,7 +274,10 @@ public enum Settings {
         private final EnumSet<OptionFlag> optionFlags = EnumSet.noneOf(OptionFlag.class);
         protected final T base;
 
-        protected T value, modifiedValue, store;
+        protected T value;
+        protected T modifiedValue;
+        @Getter
+        protected T store;
         protected Settings setting;
 
         protected NotFineOption(T base, OptionImpact impact, OptionFlag... optionFlags) {
@@ -287,10 +290,6 @@ public enum Settings {
         }
 
         public abstract void deserialize(String fragment);
-
-        public T getStore() {
-            return store;
-        }
 
         @Override
         public String getName() {

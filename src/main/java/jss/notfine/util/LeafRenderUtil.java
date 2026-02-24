@@ -2,7 +2,7 @@ package jss.notfine.util;
 
 import jss.notfine.core.Settings;
 import jss.notfine.core.SettingsManager;
-import jss.notfine.gui.options.named.LeavesQuality;
+import jss.notfine.options.named.LeavesQuality;
 import net.minecraft.block.Block;
 import net.minecraft.util.Facing;
 import net.minecraft.world.IBlockAccess;

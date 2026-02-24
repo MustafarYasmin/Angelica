@@ -1,4 +1,4 @@
-package jss.notfine.gui.options.storage;
+package jss.notfine.options.storage;
 
 import jss.notfine.NotFine;
 import jss.notfine.core.SettingsManager;

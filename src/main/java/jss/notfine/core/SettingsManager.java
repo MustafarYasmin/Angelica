@@ -1,18 +1,17 @@
 package jss.notfine.core;
 
 import jss.notfine.config.VideoSettings;
-import jss.notfine.gui.options.named.AlwaysNever;
-import jss.notfine.gui.options.named.BackgroundSelect;
-import jss.notfine.gui.options.named.DownfallQuality;
-import jss.notfine.gui.options.named.GraphicsQualityOff;
-import jss.notfine.gui.options.named.GraphicsToggle;
-import jss.notfine.gui.options.named.LeavesQuality;
+import jss.notfine.options.named.AlwaysNever;
+import jss.notfine.options.named.BackgroundSelect;
+import jss.notfine.options.named.DownfallQuality;
+import jss.notfine.options.named.GraphicsQualityOff;
+import jss.notfine.options.named.GraphicsToggle;
+import jss.notfine.options.named.LeavesQuality;
 import me.jellysquid.mods.sodium.client.gui.options.named.GraphicsQuality;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.init.Blocks;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.util.ResourceLocation;
 
 import java.io.File;
 
@@ -32,9 +31,6 @@ public class SettingsManager {
     public static boolean waterDetail;
     public static boolean vignette;
     public static byte downfallDistance;
-
-    //TODO: Hook up using sodium system
-    public static double entityRenderScaleFactor = 20000;
 
     public static void backgroundUpdated() {
         Gui.optionsBackground = ((BackgroundSelect)Settings.GUI_BACKGROUND.option.getStore()).getTexture();

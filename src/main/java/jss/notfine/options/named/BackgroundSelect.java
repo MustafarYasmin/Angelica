@@ -1,4 +1,4 @@
-package jss.notfine.gui.options.named;
+package jss.notfine.options.named;
 
 import me.jellysquid.mods.sodium.client.gui.options.named.NamedState;
 import net.minecraft.client.gui.Gui;
