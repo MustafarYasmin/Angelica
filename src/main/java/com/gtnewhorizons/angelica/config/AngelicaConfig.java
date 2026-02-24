@@ -25,11 +25,6 @@ public class AngelicaConfig {
     @Config.Ignore()
     public static boolean enableTestBlocks;
 
-    @Config.Comment("Enable Iris Shaders [Requires Celeritas]")
-    @Config.DefaultBoolean(true)
-    @Config.RequiresMcRestart
-    public static boolean enableIris;
-
     @Config.Comment("Enable MCPatcherForge features, still in Alpha. Individual features are toggled in mcpatcher.json")
     @Config.DefaultBoolean(true)
     @Config.RequiresMcRestart

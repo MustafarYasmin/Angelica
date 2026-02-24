@@ -76,7 +76,7 @@ public class Iris {
     public static final IrisLogging logger = new IrisLogging(MODNAME);
 
     // Cached at class load - config must be loaded before Iris. Do not change at runtime.
-    public static final boolean enabled = AngelicaConfig.enableIris;
+    public static final boolean enabled = false;
 
     private static Path shaderpacksDirectory;
     private static ShaderpackDirectoryManager shaderpacksDirectoryManager;

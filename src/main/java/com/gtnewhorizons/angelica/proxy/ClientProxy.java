@@ -38,8 +38,6 @@ import cpw.mods.fml.common.registry.GameData;
 import cpw.mods.fml.relauncher.ReflectionHelper;
 import jss.notfine.core.Settings;
 import me.jellysquid.mods.sodium.client.gui.SodiumOptionsGUI;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.client.IrisDebugScreenHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
@@ -123,13 +121,6 @@ public class ClientProxy extends CommonProxy {
             MinecraftForge.EVENT_BUS.register(CeleritasDebugScreenHandler.INSTANCE);
         } else {
             LOGGER.info("Celeritas is disabled, skipping initialization from init()");
-        }
-        if (AngelicaConfig.enableIris) {
-            MinecraftForge.EVENT_BUS.register(IrisDebugScreenHandler.INSTANCE);
-
-            Iris.INSTANCE.fmlInitEvent();
-            FMLCommonHandler.instance().bus().register(Iris.INSTANCE);
-            MinecraftForge.EVENT_BUS.register(Iris.INSTANCE);
         }
         if (!AngelicaConfig.enableVAO) {
             VAOManager.disableVao();

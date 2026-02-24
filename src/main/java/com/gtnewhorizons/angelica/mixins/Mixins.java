@@ -130,19 +130,6 @@ public enum Mixins implements IMixins {
         )
     ),
 
-    IRIS_STARTUP(new MixinBuilder()
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> AngelicaConfig.enableIris)
-        .addClientMixins(
-            "shaders.startup.MixinGameSettings"
-            , "shaders.startup.MixinMinecraft"
-            , "shaders.startup.MixinInitRenderer"
-            , "shaders.startup.MixinAbstractTexture"
-            , "shaders.startup.MixinTextureAtlasSprite"
-            , "shaders.startup.MixinTextureMap"
-        )
-    ),
-
     RENDERING_INFRASTRUCTURE(new MixinBuilder()
         .setPhase(Phase.EARLY)
         .setApplyIf(() -> AngelicaConfig.enableCeleritas)
@@ -197,55 +184,9 @@ public enum Mixins implements IMixins {
         )
     ),
 
-    IRIS_SHADERS(new MixinBuilder()
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> AngelicaConfig.enableIris)
-        .addClientMixins(
-              "shaders.MixinDroppedItemGlintEdges"
-            , "shaders.MixinEntityPickupFX"
-            , "shaders.MixinEntityRenderer"
-            , "shaders.MixinGuiIngameForge"
-            , "shaders.MixinFramebuffer"
-            , "shaders.MixinItem"
-            , "shaders.MixinLocale"
-            , "shaders.MixinRender"
-            , "shaders.MixinRenderBiped"
-            , "shaders.MixinRenderDragon"
-            , "shaders.MixinRenderEntityFlame"
-            , "shaders.MixinRendererLivingEntity"
-            , "shaders.MixinRenderGlobal"
-            , "shaders.MixinRenderHorse"
-            , "shaders.MixinRenderItem"
-            , "shaders.MixinRenderManager"
-            , "shaders.MixinRenderNameTag"
-            , "shaders.MixinRenderPlayerArmor"
-            , "shaders.MixinTileEntityBeaconRenderer"
-            , "shaders.MixinRenderEndPortal"
-            , "shaders.MixinTileEntityRendererDispatcher"
-        )
-    ),
-
-    IRIS_RENDERING_NOBACKHAND(new MixinBuilder("Iris Hand Shaders")
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> AngelicaConfig.enableIris)
-        .addExcludedMod(TargetedMod.BACKHAND)
-        .addClientMixins(
-            "shaders.MixinItemRenderer"
-        )
-    ),
-
-    IRIS_RENDERING_BACKHAND(new MixinBuilder("Iris Hand Shaders (Backhand)")
-        .addRequiredMod(TargetedMod.BACKHAND)
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> AngelicaConfig.enableIris)
-        .addClientMixins(
-            "shaders.MixinItemRendererBackhand"
-        )
-    ),
-
     ANGELICA_TEXTURE(new MixinBuilder()
         .setPhase(Phase.EARLY)
-        .setApplyIf(() -> AngelicaConfig.enableIris || AngelicaConfig.enableCeleritas)
+        .setApplyIf(() -> AngelicaConfig.enableCeleritas)
         .addClientMixins(
             "angelica.textures.MixinTextureAtlasSprite"
             , "angelica.textures.MixinTextureUtil"
@@ -324,11 +265,6 @@ public enum Mixins implements IMixins {
             .addRequiredMod(TargetedMod.NTM_SPACE)
             .setApplyIf(() -> CompatConfig.tweakNTMSpace)
             .addClientMixins("client.ntmSpace.MixinSkyProviderCelestial_Tweaks")),
-    NTM_SPACE_SHADER_COMPAT(new MixinBuilder("Multiple shader fixes for NTM:Space")
-            .setPhase(Phase.LATE)
-            .addRequiredMod(TargetedMod.NTM_SPACE)
-            .setApplyIf(() -> CompatConfig.fixNTMSpace && AngelicaConfig.enableIris)
-            .addClientMixins("client.ntmSpace.MixinSkyProviderCelestial_ShaderCompat", "client.ntmSpace.MixinSkyProviderLaytheSunset")),
 
     SPEEDUP_CAMPFIRE_BACKPORT_ANIMATIONS(new MixinBuilder("Add animation speedup support to Campfire Backport")
         .setPhase(Phase.LATE)
@@ -460,12 +396,6 @@ public enum Mixins implements IMixins {
             // TODO: Verify 2.3.8.18 or later to support non NH builds?
             "MixinBlockTFMagicLeaves"
         ))
-    ),
-    ET_FUTURUM_ELYTRA_CAPE(new MixinBuilder("Set custom item ID for elytra with cape texture")
-        .setPhase(Phase.LATE)
-        .addRequiredMod(TargetedMod.ET_FUTURUM_REQUIEM)
-        .setApplyIf(() -> AngelicaConfig.enableIris)
-        .addClientMixins("client.etfuturum.MixinLayerBetterElytra")
     ),
     MCPATCHER_FORGE(new MixinBuilder()
         .setPhase(Phase.EARLY)
