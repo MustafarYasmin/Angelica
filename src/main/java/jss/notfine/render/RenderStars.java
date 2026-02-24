@@ -34,9 +34,9 @@ public class RenderStars {
 
             if(distanceNormalizer < 1.0D && distanceNormalizer > 0.01D) {
                 distanceNormalizer = 1.0D / Math.sqrt(distanceNormalizer);
-                starOnUnitSphereX *= distanceNormalizer;
-                starOnUnitSphereY *= distanceNormalizer;
-                starOnUnitSphereZ *= distanceNormalizer;
+                starOnUnitSphereX *= (float) distanceNormalizer;
+                starOnUnitSphereY *= (float) distanceNormalizer;
+                starOnUnitSphereZ *= (float) distanceNormalizer;
                 final double starX = starOnUnitSphereX * 100.0D;
                 final double starY = starOnUnitSphereY * 100.0D;
                 final double starZ = starOnUnitSphereZ * 100.0D;

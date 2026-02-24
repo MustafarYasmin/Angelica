@@ -479,25 +479,6 @@ public enum Mixins implements IMixins {
             "base.MixinMinecraft"
         ))
     ),
-    MCPATCHER_FORGE_RENDERPASS_BASE(new MixinBuilder()
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> NotFineConfig.renderPass)
-        .addClientMixins(addPrefix("mcpatcherforge.renderpass.",
-            "MixinEntityRenderer",
-            "MixinRenderBlocks",
-            "MixinWorldRenderer"
-        ))
-    ),
-    MCPATCHER_FORGE_RENDERPASS_DISPLAYLIST(new MixinBuilder("RenderPass display list allocation increase")
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> NotFineConfig.renderPass && !AngelicaConfig.enableCeleritas)
-        .addClientMixins("mcpatcherforge.renderpass.MixinRenderGlobal_DisplayLists")
-    ),
-    MCPATCHER_FORGE_RENDERPASS_FEATURES(new MixinBuilder("RenderPass rendering features")
-        .setPhase(Phase.EARLY)
-        .setApplyIf(() -> NotFineConfig.renderPass && !AngelicaConfig.enableCeleritas)
-        .addClientMixins("mcpatcherforge.renderpass.MixinRenderGlobal_Features")
-    ),
     MCPATCHER_FORGE_CUSTOM_COLORS(new MixinBuilder()
         .setPhase(Phase.EARLY)
         .setApplyIf(() -> AngelicaConfig.enableMCPatcherForgeFeatures && MCPatcherForgeConfig.CustomColors.enabled)

@@ -133,7 +133,7 @@ public class ASMUtils {
                 yield false;
             }
             default -> {
-                AngelicaTweaker.LOGGER.warn("Unchecked node found: " + node1.getClass());
+                AngelicaTweaker.LOGGER.warn("Unchecked node found: {}", node1.getClass());
                 yield node1.toString()
                     .equals(node2.toString());
             }

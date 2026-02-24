@@ -8,6 +8,7 @@
 
 package jss.util;
 
+import java.io.Serial;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -25,11 +26,12 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Una Thompson &lt;una@unascribed.com> (Java port)
  */
 public class RandomXoshiro256StarStar extends Random {
-	private static final long serialVersionUID = -2837799889588687855L;
+	@Serial
+    private static final long serialVersionUID = -2837799889588687855L;
 
 	private static final AtomicLong uniq = new AtomicLong(System.nanoTime());
 
-	private static final long nextUniq() {
+	private static long nextUniq() {
 		return splitmix64_2(uniq.addAndGet(SPLITMIX1_MAGIC));
 	}
 
@@ -39,14 +41,9 @@ public class RandomXoshiro256StarStar extends Random {
 
 	public RandomXoshiro256StarStar(long seed) {
 		super(seed);
-		// super will call setSeed
 	}
 
-	public RandomXoshiro256StarStar(long s1, long s2, long s3, long s4) {
-		setState(s1, s2, s3, s4);
-	}
-
-	// used to "stretch" seeds into a full 256-bit state; also makes
+    // used to "stretch" seeds into a full 256-bit state; also makes
 	// it safe to pass in zero as a seed
 	////
 	// what generator is used here is unimportant, as long as it's
@@ -80,16 +77,7 @@ public class RandomXoshiro256StarStar extends Random {
 		s3 = splitmix64_2(sms);
 	}
 
-	public void setState(long s0, long s1, long s2, long s4) {
-		if (s0 == 0 && s1 == 0 && s2 == 0 && s4 == 0)
-			throw new IllegalArgumentException("xoshiro256** state cannot be all zeroes");
-		this.s0 = s0;
-		this.s1 = s1;
-		this.s2 = s2;
-		this.s3 = s4;
-	}
-
-	// not called, implemented instead of just throwing for completeness
+    // not called, implemented instead of just throwing for completeness
 	@Override
 	protected int next(int bits) {
 		return (int)(nextLong() & ((1L << bits) - 1));

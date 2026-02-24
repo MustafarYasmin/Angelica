@@ -25,11 +25,11 @@ public class InterpolatedIcon extends TextureAtlasSprite {
 		super.updateAnimation();
 		try {
 			updateAnimationInterpolated();
-		} catch (Exception e) {
+		} catch (Exception _) {
 		}
 	}
 
-	private void updateAnimationInterpolated() throws IllegalArgumentException, IllegalAccessException {
+	private void updateAnimationInterpolated() throws IllegalArgumentException {
 
 		double d0 = 1.0D - tickCounter / (double) animationMetadata.getFrameTimeSingle(frameCounter);
 		int i = animationMetadata.getFrameIndex(frameCounter);
@@ -37,8 +37,8 @@ public class InterpolatedIcon extends TextureAtlasSprite {
 		int k = animationMetadata.getFrameIndex((frameCounter + 1) % j);
 
 		if (i != k && k >= 0 && k < framesTextureData.size()) {
-			int[][] aint = (int[][]) framesTextureData.get(i);
-			int[][] aint1 = (int[][]) framesTextureData.get(k);
+			int[][] aint = framesTextureData.get(i);
+			int[][] aint1 = framesTextureData.get(k);
 
 			if (interpolatedFrameData == null || interpolatedFrameData.length != aint.length)
 				interpolatedFrameData = new int[aint.length][];
