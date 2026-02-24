@@ -1,23 +1,15 @@
 package net.coderbot.iris;
 
-import com.google.common.base.Throwables;
 import com.gtnewhorizons.angelica.AngelicaMod;
-import com.gtnewhorizons.angelica.Tags;
-import com.gtnewhorizons.angelica.config.AngelicaConfig;
-import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.common.eventhandler.SubscribeEvent;
 import cpw.mods.fml.common.gameevent.InputEvent;
 import lombok.Getter;
 import net.coderbot.iris.block_rendering.BlockRenderingSettings;
-import net.coderbot.iris.celeritas.IrisCeleritasShaderProvider;
-import com.gtnewhorizons.angelica.rendering.celeritas.api.IrisShaderProviderHolder;
 import net.coderbot.iris.config.IrisConfig;
 import net.coderbot.iris.gl.shader.StandardMacros;
-import net.coderbot.iris.gui.screen.ShaderPackScreen;
 import net.coderbot.iris.pipeline.DeferredWorldRenderingPipeline;
 import net.coderbot.iris.pipeline.transform.ShaderTransformer;
 import net.coderbot.iris.pipeline.transform.TransformPatcher;
-import net.coderbot.iris.gbuffer_overrides.matching.InputAvailability;
 import net.coderbot.iris.pipeline.FixedFunctionWorldRenderingPipeline;
 import net.coderbot.iris.pipeline.PipelineManager;
 import net.coderbot.iris.pipeline.WorldRenderingPipeline;
@@ -26,14 +18,10 @@ import net.coderbot.iris.shaderpack.ShaderPack;
 import net.coderbot.iris.shaderpack.discovery.ShaderpackDirectoryManager;
 import net.coderbot.iris.shaderpack.option.Profile;
 import net.coderbot.iris.shaderpack.option.values.MutableOptionValues;
-import net.coderbot.iris.texture.pbr.PBRTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.multiplayer.WorldClient;
-import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.util.ChatComponentText;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.input.Keyboard;
 
@@ -85,8 +73,6 @@ public class Iris {
     @Getter
     private static String currentPackName;
     @Getter
-    private static boolean initialized;
-    @Getter
     private static int shaderPackLoadId = 0;
 
     private static PipelineManager pipelineManager;
@@ -101,7 +87,6 @@ public class Iris {
     // behavior is more concrete and therefore is more likely to repair a user's issues
     private static boolean resetShaderPackOptions = false;
 
-    private static String IRIS_VERSION;
     @Getter
     private static boolean fallback;
 
@@ -184,22 +169,6 @@ public class Iris {
             }
         }
 
-        /**
-         * Warm up the threadpool by running a representative shader transformation.
-         */
-        public static void warmup() {
-            final String vertexShader = "#version 120\nvoid main() { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }";
-            final String fragmentShader = "#version 120\nvoid main() { gl_FragColor = vec4(1.0); }";
-            try {
-                submitTracked(() -> {
-                    TransformPatcher.patchComposite(vertexShader, null, fragmentShader);
-                    TransformPatcher.patchAttributes(vertexShader, null, fragmentShader, new InputAvailability(true, true));
-                }).get();
-            } catch (Exception e) {
-                logger.warn("Warmup failed", e);
-            }
-        }
-
         public static <T> CompletableFuture<T> submitTracked(Supplier<T> supplier) {
             Objects.requireNonNull(supplier);
             noteActivity();
@@ -219,12 +188,12 @@ public class Iris {
             }
         }
 
-        public static CompletableFuture<Void> submitTracked(Runnable runnable) {
+        public static void submitTracked(Runnable runnable) {
             Objects.requireNonNull(runnable);
             noteActivity();
             inFlight.incrementAndGet();
             try {
-                return CompletableFuture.runAsync(() -> {
+                CompletableFuture.runAsync(() -> {
                     try {
                         runnable.run();
                     } finally {
@@ -274,10 +243,6 @@ public class Iris {
         }
     }
 
-    private static KeyBinding reloadKeybind;
-    private static KeyBinding toggleShadersKeybind;
-    private static KeyBinding shaderpackScreenKeybind;
-
     public static Iris INSTANCE = new Iris();
 
     private Iris() {
@@ -288,32 +253,6 @@ public class Iris {
 
     @SubscribeEvent
     public void onKeypress(InputEvent.KeyInputEvent event) {
-        if (reloadKeybind.isPressed()) {
-            final Minecraft mc = Minecraft.getMinecraft();
-            try {
-                reload();
-                if (mc.thePlayer != null) mc.thePlayer.addChatMessage(new ChatComponentText("Shaders Reloaded!"));
-
-            } catch (Exception e) {
-                logger.error("Error while reloading Shaders for Iris!", e);
-                if (mc.thePlayer != null) mc.thePlayer.addChatMessage(new ChatComponentText( "Failed tgo reload shaders! Reason: " + Throwables.getRootCause(e).getMessage()));
-            }
-        } else if (toggleShadersKeybind.isPressed()) {
-            final Minecraft mc = Minecraft.getMinecraft();
-            try {
-                toggleShaders(mc, !irisConfig.areShadersEnabled());
-            } catch (Exception e) {
-                logger.error("Error while toggling shaders!", e);
-
-                if (mc.thePlayer != null) mc.thePlayer.addChatMessage(new ChatComponentText( "Failed tgo toggle shaders! Reason: " + Throwables.getRootCause(e).getMessage()));
-                setShadersDisabled();
-                fallback = true;
-            }
-        } else if (shaderpackScreenKeybind.isPressed()) {
-            final Minecraft mc = Minecraft.getMinecraft();
-            mc.displayGuiScreen(new ShaderPackScreen(null));
-        }
-
     }
 
     @SubscribeEvent
@@ -327,103 +266,7 @@ public class Iris {
         }
     }
 
-    /**
-     * Called very early on in Minecraft initialization. At this point we *cannot* safely access OpenGL, but we can do some very basic setup, config loading,
-     * and environment checks.
-     *
-     * <p>This is roughly equivalent to Fabric Loader's ClientModInitializer#onInitializeClient entrypoint, except
-     * it's entirely cross platform & we get to decide its exact semantics.</p>
-     *
-     * <p>This is called right before options are loaded, so we can add key bindings here.</p>
-     */
-    public void onEarlyInitialize() {
-        try {
-            if (!Files.exists(getShaderpacksDirectory())) {
-                Files.createDirectories(getShaderpacksDirectory());
-            }
-        } catch (IOException e) {
-            logger.warn("Failed to create the shaderpacks directory!");
-            logger.warn("", e);
-        }
-
-        irisConfig = new IrisConfig(Minecraft.getMinecraft().mcDataDir.toPath().resolve("config").resolve("shaders.properties"));
-
-        try {
-            irisConfig.initialize();
-        } catch (IOException e) {
-            logger.error("Failed to initialize Angelica configuration, default values will be used instead");
-            logger.error("", e);
-        }
-
-
-        initialized = true;
-    }
-
-    /**
-     * Called once RenderSystem#initRenderer has completed. This means that we can safely access OpenGL.
-     */
-    public static void onRenderSystemInit() {
-        if (!initialized) {
-            Iris.logger.warn("Iris::onRenderSystemInit was called, but Iris::onEarlyInitialize was not called."
-                + " Trying to avoid a crash but this is an odd state.");
-            return;
-        }
-
-        // Register the Celeritas shader provider for Iris integration (only when Celeritas is enabled)
-        if (AngelicaConfig.enableCeleritas) {
-            IrisShaderProviderHolder.setProvider(new IrisCeleritasShaderProvider());
-        }
-
-        // Warm up the threadpool so shader transformations are faster when we need them
-        ShaderTransformExecutor.warmup();
-
-        // Initialize version hoisting pattern based on GL capabilities
-        ShaderTransformer.init();
-
-        PBRTextureManager.INSTANCE.init();
-
-        // Only load the shader pack when we can access OpenGL
-        loadShaderpack();
-    }
-
-    /**
-     * Called when the title screen is initialized for the first time.
-     */
-    public static void onLoadingComplete() {
-        if (!initialized) {
-            Iris.logger.warn("Iris::onLoadingComplete was called, but Iris::onEarlyInitialize was not called."
-                + " Trying to avoid a crash but this is an odd state.");
-            return;
-        }
-
-        // Initialize the pipeline now so that we don't increase world loading time. Just going to guess that
-        // the player is in the overworld.
-        // See: https://github.com/IrisShaders/Iris/issues/323
-        lastDimensionName = "Overworld";
-        Iris.getPipelineManager().preparePipeline("Overworld");
-
-        BlockRenderingSettings.INSTANCE.reloadRendererIfRequired();
-    }
-
-    public static void toggleShaders(Minecraft minecraft, boolean enabled) throws IOException {
-        irisConfig.setShadersEnabled(enabled);
-        irisConfig.save();
-
-        reload();
-        if (minecraft.thePlayer != null) {
-            minecraft.thePlayer.addChatMessage(new ChatComponentText(enabled ? I18n.format("iris.shaders.toggled", currentPackName) : I18n.format("iris.shaders.disabled")));
-        }
-    }
-
     public static void loadShaderpack() {
-        if (irisConfig == null) {
-            if (!initialized) {
-                throw new IllegalStateException("Iris::loadShaderpack was called, but Iris::onInitializeClient wasn't" + " called yet. How did this happen?");
-            } else {
-                throw new NullPointerException("Iris.irisConfig was null unexpectedly");
-            }
-        }
-
         if (!irisConfig.areShadersEnabled()) {
             logger.info("Shaders are disabled because enableShaders is set to false in shaders.properties");
 
@@ -788,11 +631,7 @@ public class Iris {
     }
 
     public static String getVersion() {
-        if (IRIS_VERSION == null) {
-            return "Version info unknown!";
-        }
-
-        return IRIS_VERSION;
+        return null;
     }
 
     public static Path getShaderpacksDirectory() {
@@ -809,17 +648,6 @@ public class Iris {
         }
 
         return shaderpacksDirectoryManager;
-    }
-
-    public void fmlInitEvent() {
-        IRIS_VERSION = Tags.VERSION;
-        reloadKeybind = new KeyBinding("Reload Shaders", 0, "Iris Keybinds");
-        toggleShadersKeybind = new KeyBinding("Toggle Shaders", 0, "Iris Keybinds");
-        shaderpackScreenKeybind = new KeyBinding("Shaderpack Selection Screen", 0, "Iris Keybinds");
-
-        ClientRegistry.registerKeyBinding(reloadKeybind);
-        ClientRegistry.registerKeyBinding(toggleShadersKeybind);
-        ClientRegistry.registerKeyBinding(shaderpackScreenKeybind);
     }
 
 }

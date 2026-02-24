@@ -24,11 +24,11 @@ public class MixinRenderBlockCampfire {
 
     @ModifyArgs(method = "renderFire", at = @At(value = "INVOKE", target = "Lconnor135246/campfirebackport/client/rendering/RenderBlockCampfire;drawCrossedSquaresTwoIcons(Lnet/minecraft/util/IIcon;Lnet/minecraft/util/IIcon;DDDF)V"))
     private static void angelica$onDrawCrossedSquaresTwoIcons(Args args, double x, double y, double z, Block block, RenderBlocks renderer, boolean mix) {
-        IIcon icon1 = (IIcon)args.get(0);
+        IIcon icon1 = args.get(0);
         AnimationsRenderUtils.markBlockTextureForUpdate(icon1, renderer.blockAccess);
         ((ITexturesCache)renderer).getRenderedTextures().add(icon1);
 
-        IIcon icon2 = (IIcon)args.get(1);
+        IIcon icon2 = args.get(1);
         AnimationsRenderUtils.markBlockTextureForUpdate(icon2, renderer.blockAccess);
         ((ITexturesCache)renderer).getRenderedTextures().add(icon2);
     }

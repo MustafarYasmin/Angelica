@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.Unique;
 public abstract class MixinRenderBlockConnectedTexturesEthereal extends RenderBlockConnectedTextures{
 
     @Unique
-    private FakeRenderEtherealBlocks newFakeRenderEthereal = new FakeRenderEtherealBlocks();
+    private final FakeRenderEtherealBlocks newFakeRenderEthereal = new FakeRenderEtherealBlocks();
 
     /**
      * @author Cleptomania

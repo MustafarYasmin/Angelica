@@ -14,12 +14,7 @@ public abstract class MixinBlockTFMagicLeaves extends BlockLeaves {
     public IIcon getIcon(IBlockAccess world, int x, int y, int z, int side) {
         int maskedMeta = world.getBlockMetadata(x, y, z) & 3;
         final boolean renderMode = LeafRenderUtil.selectRenderMode(world, x, y, z, side);
-        maskedMeta = maskedMeta > 1 ? 0 : maskedMeta;
-        return switch (maskedMeta) {
-            case 1 -> renderMode ? SPR_TRANSLEAVES_OPAQUE : SPR_TRANSLEAVES;
-            case 3 -> renderMode ? SPR_SORTLEAVES_OPAQUE : SPR_SORTLEAVES;
-            default -> renderMode ? SPR_TIMELEAVES_OPAQUE : SPR_TIMELEAVES;
-        };
+        return (maskedMeta == 1) ? (renderMode ? SPR_TRANSLEAVES_OPAQUE : SPR_TRANSLEAVES) : (renderMode ? SPR_TIMELEAVES_OPAQUE : SPR_TIMELEAVES);
     }
 
     @Shadow(remap = false)
@@ -30,9 +25,5 @@ public abstract class MixinBlockTFMagicLeaves extends BlockLeaves {
     public static IIcon SPR_TRANSLEAVES;
     @Shadow(remap = false)
     public static IIcon SPR_TRANSLEAVES_OPAQUE;
-    @Shadow(remap = false)
-    public static IIcon SPR_SORTLEAVES;
-    @Shadow(remap = false)
-    public static IIcon SPR_SORTLEAVES_OPAQUE;
 
 }

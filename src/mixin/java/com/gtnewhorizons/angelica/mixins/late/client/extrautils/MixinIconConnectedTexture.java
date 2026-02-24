@@ -18,7 +18,7 @@ public class MixinIconConnectedTexture {
     public IIcon[] icons;
 
     @Unique
-    private ThreadLocal<Integer> newN = ThreadLocal.withInitial(() -> 0);
+    private final ThreadLocal<Integer> newN = ThreadLocal.withInitial(() -> 0);
 
     /**
      * @author Cleptomania

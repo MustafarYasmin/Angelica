@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.Unique;
 public class MixinRenderBlockConnectedTextures {
 
     @Unique
-    private FakeRenderBlocks newFakeRender = new FakeRenderBlocks();
+    private final FakeRenderBlocks newFakeRender = new FakeRenderBlocks();
 
     /**
      * @author Cleptomania
