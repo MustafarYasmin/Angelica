@@ -1,7 +1,6 @@
 package net.coderbot.iris.gl.program;
 
 import com.google.common.collect.ImmutableSet;
-import com.gtnewhorizons.angelica.glsm.RenderSystem;
 import net.coderbot.iris.gl.image.ImageHolder;
 import net.coderbot.iris.gl.sampler.GlSampler;
 import net.coderbot.iris.gl.sampler.SamplerHolder;
@@ -28,11 +27,7 @@ public class ProgramBuilder extends ProgramUniforms.Builder implements SamplerHo
 		this.images = ProgramImages.builder(program);
 	}
 
-	public void bindAttributeLocation(int index, String name) {
-		RenderSystem.bindAttributeLocation(program, index, name);
-	}
-
-	public static ProgramBuilder begin(String name, @Nullable String vertexSource, @Nullable String geometrySource,
+    public static ProgramBuilder begin(String name, @Nullable String vertexSource, @Nullable String geometrySource,
 									   @Nullable String fragmentSource, ImmutableSet<Integer> reservedTextureUnits) {
 		return begin(name, vertexSource, geometrySource, null, null, fragmentSource, reservedTextureUnits);
 	}
@@ -62,29 +57,11 @@ public class ProgramBuilder extends ProgramUniforms.Builder implements SamplerHo
 		return new ProgramBuilder(name, programId, reservedTextureUnits);
 	}
 
-	public static ProgramBuilder beginCompute(String name, @Nullable String source, ImmutableSet<Integer> reservedTextureUnits) {
-		if (!RenderSystem.supportsCompute()) {
-			throw new IllegalStateException("This PC does not support compute shaders, but it's attempting to be used???");
-		}
-
-		GlShader compute = buildShader(ShaderType.COMPUTE, name + ".csh", source);
-
-		int programId = ProgramCreator.create(name, compute);
-
-		compute.destroy();
-
-		return new ProgramBuilder(name, programId, reservedTextureUnits);
-	}
-
-	public Program build() {
+    public Program build() {
 		return new Program(program, super.buildUniforms(), this.samplers.build(), this.images.build());
 	}
 
-	public ComputeProgram buildCompute() {
-		return new ComputeProgram(program, super.buildUniforms(), this.samplers.build(), this.images.build());
-	}
-
-	private static GlShader buildShader(ShaderType shaderType, String name, @Nullable String source) {
+    private static GlShader buildShader(ShaderType shaderType, String name, @Nullable String source) {
 		try {
 			return new GlShader(shaderType, name, source);
 		} catch (RuntimeException e) {

@@ -38,7 +38,7 @@ public class TextureTracker {
 		}
 		if (GLStateManager.getActiveTextureUnit() == 0) {
 			lockBindCallback = true;
-            if(Iris.enabled) {
+            if(false) {
                 final WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
                 if (pipeline != null) {
                     pipeline.onBindTexture(id);

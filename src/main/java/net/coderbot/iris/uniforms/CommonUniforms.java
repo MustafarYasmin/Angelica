@@ -1,6 +1,5 @@
 package net.coderbot.iris.uniforms;
 
-import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import com.gtnewhorizons.angelica.glsm.states.BlendState;
 import com.gtnewhorizons.angelica.glsm.texture.TextureInfo;
@@ -10,12 +9,7 @@ import com.gtnewhorizons.angelica.mixins.interfaces.EntityRendererAccessor;
 import net.coderbot.iris.gl.state.FogMode;
 import net.coderbot.iris.gl.state.ValueUpdateNotifier;
 import net.coderbot.iris.gl.uniform.DynamicUniformHolder;
-import net.coderbot.iris.gl.uniform.UniformHolder;
 import net.coderbot.iris.layer.GbufferPrograms;
-import net.coderbot.iris.shaderpack.IdMap;
-import net.coderbot.iris.shaderpack.PackDirectives;
-import net.coderbot.iris.uniforms.transforms.SmoothedFloat;
-import net.coderbot.iris.uniforms.transforms.SmoothedVec2f;
 import net.minecraft.block.material.Material;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.AbstractTexture;
@@ -27,14 +21,9 @@ import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.util.Vec3;
 import org.joml.Math;
-import org.joml.Vector2f;
 import org.joml.Vector2i;
 import org.joml.Vector3d;
 import org.joml.Vector4i;
-
-import static net.coderbot.iris.gl.uniform.UniformUpdateFrequency.PER_FRAME;
-import static net.coderbot.iris.gl.uniform.UniformUpdateFrequency.PER_TICK;
-import static net.coderbot.iris.gl.uniform.UniformUpdateFrequency.ONCE;
 
 public final class CommonUniforms {
 	private static final Minecraft client = Minecraft.getMinecraft();
@@ -46,25 +35,7 @@ public final class CommonUniforms {
 		// no construction allowed
 	}
 
-    public static void addNonDynamicUniforms(UniformHolder uniforms, IdMap idMap, PackDirectives directives, FrameUpdateNotifier updateNotifier) {
-        CameraUniforms.addCameraUniforms(uniforms, updateNotifier);
-        ViewportUniforms.addViewportUniforms(uniforms);
-        WorldTimeUniforms.addWorldTimeUniforms(uniforms);
-        SystemTimeUniforms.addSystemTimeUniforms(uniforms);
-		BiomeUniforms.addBiomeUniforms(uniforms);
-        new CelestialUniforms(directives.getSunPathRotation()).addCelestialUniforms(uniforms);
-        IrisExclusiveUniforms.addIrisExclusiveUniforms(uniforms);
-        IdMapUniforms.addIdMapUniforms(updateNotifier, uniforms, idMap, directives.isOldHandLight());
-        MatrixUniforms.addMatrixUniforms(uniforms, directives);
-
-        if (AngelicaConfig.enableHardcodedCustomUniforms) {
-            HardcodedCustomUniforms.addHardcodedCustomUniforms(uniforms, updateNotifier);
-        }
-
-        CommonUniforms.generalCommonUniforms(uniforms, updateNotifier, directives);
-    }
-
-	// Needs to use a LocationalUniformHolder as we need it for the common uniforms
+    // Needs to use a LocationalUniformHolder as we need it for the common uniforms
 	public static void addDynamicUniforms(DynamicUniformHolder uniforms, FogMode fogMode) {
 		ExternallyManagedUniforms.addExternallyManagedUniforms116(uniforms);
         IdMapUniforms.addEntityIdMapUniforms(uniforms);
@@ -103,41 +74,6 @@ public final class CommonUniforms {
 
         uniforms.uniform4f("entityColor", CapturedRenderingState.INSTANCE::getCurrentEntityColor, CapturedRenderingState.INSTANCE.getEntityColorNotifier());
 
-	}
-
-	public static void generalCommonUniforms(UniformHolder uniforms, FrameUpdateNotifier updateNotifier, PackDirectives directives) {
-		ExternallyManagedUniforms.addExternallyManagedUniforms116(uniforms);
-
-		final SmoothedVec2f eyeBrightnessSmooth = new SmoothedVec2f(directives.getEyeBrightnessHalfLife(), directives.getEyeBrightnessHalfLife(), CommonUniforms::getEyeBrightness, updateNotifier);
-
-        uniforms
-            .uniform1f(ONCE, "darknessFactor", () -> 0.0F) // This is PER_FRAME in modern, it is an effect added by The Warden. We're just setting to 0 because 1.7.10 doesn't have it.
-            .uniform1f(ONCE, "darknessLightFactor", () -> 0.0F) // Warden darkness current light factor - 1.7.10 doesn't have it so hardcode to 0
-			.uniform1b(PER_FRAME, "hideGUI", () -> client.gameSettings.hideGUI)
-			.uniform1i(PER_FRAME, "isEyeInWater", CommonUniforms::isEyeInWater)
-			.uniform1f(PER_FRAME, "blindness", CommonUniforms::getBlindness)
-			.uniform1f(PER_FRAME, "nightVision", CommonUniforms::getNightVision)
-            .uniform1b(PER_FRAME, "is_sneaking", CommonUniforms::isSneaking)
-            .uniform1b(PER_FRAME, "is_sprinting", CommonUniforms::isSprinting)
-            .uniform1b(PER_FRAME, "is_hurt", CommonUniforms::isHurt)
-            .uniform1b(PER_FRAME, "is_invisible", CommonUniforms::isInvisible)
-            .uniform1b(PER_FRAME, "is_burning", CommonUniforms::isBurning)
-            .uniform1b(PER_FRAME, "is_on_ground", CommonUniforms::isOnGround)
-			// TODO: Do we need to clamp this to avoid fullbright breaking shaders? Or should shaders be able to detect
-			//       that the player is trying to turn on fullbright?
-			.uniform1f(PER_FRAME, "screenBrightness", () -> client.gameSettings.gammaSetting)
-			// just a dummy value for shaders where entityColor isn't supplied through a vertex attribute (and thus is
-			// not available) - suppresses warnings. See AttributeShaderTransformer for the actual entityColor code.
-            .uniform1f(PER_TICK, "playerMood", CommonUniforms::getPlayerMood)
-			.uniform2i(PER_FRAME, "eyeBrightness", CommonUniforms::getEyeBrightness)
-			.uniform2i(PER_FRAME, "eyeBrightnessSmooth", () -> {
-				final Vector2f smoothed = eyeBrightnessSmooth.get();
-				return new Vector2i((int) smoothed.x(),(int) smoothed.y());
-			})
-			.uniform1f(PER_TICK, "rainStrength", CommonUniforms::getRainStrength)
-			.uniform1f(PER_TICK, "wetness", new SmoothedFloat(directives.getWetnessHalfLife(), directives.getDrynessHalfLife(), CommonUniforms::getRainStrength, updateNotifier))
-			.uniform3d(PER_FRAME, "skyColor", CommonUniforms::getSkyColor)
-			.uniform3d(PER_FRAME, "fogColor", GLStateManager::getFogColor);
 	}
 
     private static boolean isOnGround() {

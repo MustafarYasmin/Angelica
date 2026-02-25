@@ -3,7 +3,6 @@ package net.coderbot.iris.shaderpack;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unimi.dsi.fastutil.booleans.BooleanConsumer;
 import net.coderbot.iris.gl.blending.AlphaTestOverride;
 import net.coderbot.iris.gl.blending.BlendModeOverride;
 import net.coderbot.iris.gl.blending.BufferBlendInformation;
@@ -11,11 +10,8 @@ import net.coderbot.iris.gl.framebuffer.ViewportData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class ProgramDirectives {
 	private static final ImmutableList<String> LEGACY_RENDER_TARGETS = PackRenderTargetDirectives.LEGACY_RENDER_TARGETS;
@@ -44,78 +40,7 @@ public class ProgramDirectives {
 		this.unknownDrawBuffers = false;
 	}
 
-	ProgramDirectives(ProgramSource source, ShaderProperties properties, Set<Integer> supportedRenderTargets, @Nullable BlendModeOverride defaultBlendOverride) {
-		// DRAWBUFFERS is only detected in the fragment shader source code (.fsh).
-		// If there's no explicit declaration, then by default /* DRAWBUFFERS:0 */ is inferred.
-		// For SEUS v08 and SEUS v10 to work, this will need to be set to 01234567. However, doing this causes
-		// TAA to break on Sildur's Vibrant Shaders, since gbuffers_skybasic lacks a DRAWBUFFERS directive, causing
-		// undefined data to be written to colortex7.
-		//
-		// TODO: Figure out how to infer the DRAWBUFFERS directive when it is missing.
-		final Optional<CommentDirective> optionalDrawbuffersDirective = findDrawbuffersDirective(source.getFragmentSource());
-		final Optional<CommentDirective> optionalRendertargetsDirective = findRendertargetsDirective(source.getFragmentSource());
-
-		Optional<CommentDirective> optionalCommentDirective = getAppliedDirective(optionalDrawbuffersDirective, optionalRendertargetsDirective);
-		drawBuffers = optionalCommentDirective.map(commentDirective -> {
-			if (commentDirective.getType() == CommentDirective.Type.DRAWBUFFERS) {
-				return parseDigits(commentDirective.getDirective().toCharArray());
-			} else if (commentDirective.getType() == CommentDirective.Type.RENDERTARGETS) {
-				return parseDigitList(commentDirective.getDirective());
-			} else {
-				throw new IllegalStateException("Unhandled comment directive type!");
-			}
-		}).orElseGet(() -> {
-			unknownDrawBuffers = true;
-			return new int[]{0};
-		});
-
-		if (properties != null) {
-			viewportScale = properties.getViewportScaleOverrides().getOrDefault(source.getName(), ViewportData.defaultValue());
-			alphaTestOverride = properties.getAlphaTestOverrides().get(source.getName());
-
-			final BlendModeOverride blendModeOverride = properties.getBlendModeOverrides().get(source.getName());
-			final List<BufferBlendInformation> bufferBlendInformations = properties.getBufferBlendOverrides().get(source.getName());
-			this.blendModeOverride = Optional.ofNullable(blendModeOverride != null ? blendModeOverride : defaultBlendOverride);
-			this.bufferBlendInformations = bufferBlendInformations != null ? bufferBlendInformations : Collections.emptyList();
-
-			explicitFlips = source.getParent().getPackDirectives().getExplicitFlips(source.getName());
-		} else {
-			viewportScale = ViewportData.defaultValue();
-			alphaTestOverride = null;
-			blendModeOverride = Optional.ofNullable(defaultBlendOverride);
-			bufferBlendInformations = Collections.emptyList();
-			explicitFlips = ImmutableMap.of();
-		}
-
-		final HashSet<Integer> mipmappedBuffers = new HashSet<>();
-		final DispatchingDirectiveHolder directiveHolder = new DispatchingDirectiveHolder();
-
-		supportedRenderTargets.forEach(index -> {
-			final BooleanConsumer mipmapHandler = shouldMipmap -> {
-				if (shouldMipmap) {
-					mipmappedBuffers.add(index);
-				} else {
-					mipmappedBuffers.remove(index);
-				}
-			};
-
-			directiveHolder.acceptConstBooleanDirective("colortex" + index + "MipmapEnabled", mipmapHandler);
-
-			if (index < LEGACY_RENDER_TARGETS.size()) {
-				directiveHolder.acceptConstBooleanDirective(LEGACY_RENDER_TARGETS.get(index) + "MipmapEnabled", mipmapHandler);
-			}
-		});
-
-		source.getFragmentSource().map(ConstDirectiveParser::findDirectives).ifPresent(directives -> {
-			for (ConstDirectiveParser.ConstDirective directive : directives) {
-				directiveHolder.processDirective(directive);
-			}
-		});
-
-		this.mipmappedBuffers = ImmutableSet.copyOf(mipmappedBuffers);
-	}
-
-	public ProgramDirectives withOverriddenDrawBuffers(int[] drawBuffersOverride) {
+    public ProgramDirectives withOverriddenDrawBuffers(int[] drawBuffersOverride) {
 		return new ProgramDirectives(drawBuffersOverride, viewportScale, alphaTestOverride, blendModeOverride, bufferBlendInformations,
 			mipmappedBuffers, explicitFlips);
 	}

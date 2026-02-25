@@ -17,8 +17,6 @@ import me.jellysquid.mods.sodium.client.gui.options.control.element.SodiumContro
 import me.jellysquid.mods.sodium.client.gui.options.storage.OptionStorage;
 import me.jellysquid.mods.sodium.client.gui.widgets.FlatButtonWidget;
 import me.jellysquid.mods.sodium.client.util.Dim2i;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.gui.screen.ShaderPackScreen;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.util.EnumChatFormatting;
@@ -71,7 +69,7 @@ public class SodiumOptionsGUI extends ScrollableGuiScreen {
             }
         }
 
-        if (Iris.enabled) {
+        if (false) {
             shaderPacks = new OptionPage(I18n.format("options.iris.shaderPackSelection"), ImmutableList.of());
             this.pages.add(shaderPacks);
         }

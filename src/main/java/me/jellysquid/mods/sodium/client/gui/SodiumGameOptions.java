@@ -114,7 +114,7 @@ public class SodiumGameOptions {
         }
 
         Files.writeString(this.configPath, GSON.toJson(this));
-        if(Iris.enabled) {
+        if(false) {
             try {
                 if (Iris.getIrisConfig() != null) {
                     Iris.getIrisConfig().save();

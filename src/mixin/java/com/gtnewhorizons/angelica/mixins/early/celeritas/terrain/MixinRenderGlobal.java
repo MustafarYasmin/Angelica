@@ -9,20 +9,13 @@ import com.gtnewhorizons.angelica.rendering.RenderingState;
 import com.gtnewhorizons.angelica.rendering.celeritas.BlockRenderLayer;
 import com.gtnewhorizons.angelica.rendering.celeritas.CeleritasSetup;
 import com.gtnewhorizons.angelica.rendering.celeritas.CeleritasWorldRenderer;
-import net.coderbot.iris.Iris;
 import net.coderbot.iris.layer.GbufferPrograms;
-import net.coderbot.iris.pipeline.HandRenderer;
-import net.coderbot.iris.pipeline.WorldRenderingPhase;
-import net.coderbot.iris.pipeline.WorldRenderingPipeline;
-import net.coderbot.iris.shadows.ShadowRenderingState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.RenderGlobal;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.culling.ICamera;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import org.embeddedt.embeddium.impl.gl.device.RenderDevice;
@@ -32,7 +25,6 @@ import org.embeddedt.embeddium.impl.render.viewport.ViewportProvider;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,7 +45,6 @@ import static org.joml.Math.lerp;
 @Mixin(value = RenderGlobal.class, priority = 900)
 public class MixinRenderGlobal implements IRenderGlobalExt {
     @Shadow public Minecraft mc;
-    @Shadow @Final private TextureManager renderEngine;
 
     @Unique private CeleritasWorldRenderer celeritas$renderer;
     @Unique private int celeritas$frame;
@@ -118,22 +109,6 @@ public class MixinRenderGlobal implements IRenderGlobalExt {
     @Overwrite
     public int sortAndRender(EntityLivingBase entity, int pass, double partialTicks) {
 
-        final WorldRenderingPipeline pipeline;
-        if (!Iris.enabled) {
-            pipeline = null;
-        } else {
-            pipeline = Iris.getPipelineManager().getPipelineNullable();
-            if (pass == 0) {
-                pipeline.setPhase(WorldRenderingPhase.TERRAIN_CUTOUT);
-            } else if (pass == 1) {
-                if (!ShadowRenderingState.areShadowsCurrentlyBeingRendered()) {
-                    iris$beginTranslucents(pipeline, Camera.INSTANCE);
-                }
-                pipeline.setPhase(WorldRenderingPhase.TERRAIN_TRANSLUCENT);
-                this.renderEngine.bindTexture(TextureMap.locationBlocksTexture);
-            }
-        }
-
         RenderDevice.enterManagedCode();
 
         RenderHelper.disableStandardItemLighting();
@@ -166,8 +141,6 @@ public class MixinRenderGlobal implements IRenderGlobalExt {
         }
 
         this.mc.entityRenderer.disableLightmap(partialTicks);
-
-        if (pipeline != null) pipeline.setPhase(WorldRenderingPhase.NONE);
 
         return 0;
     }
@@ -239,12 +212,12 @@ public class MixinRenderGlobal implements IRenderGlobalExt {
 
     @Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderHelper;enableStandardItemLighting()V", shift = At.Shift.AFTER, ordinal = 0), cancellable = true)
     public void celeritas$renderTileEntities(EntityLivingBase entity, ICamera camera, float partialTicks, CallbackInfo ci) {
-        if (Iris.enabled) {
+        if (false) {
             GbufferPrograms.beginBlockEntities();
             GbufferPrograms.setBlockEntityDefaults();
         }
         this.celeritas$renderer.renderBlockEntities(partialTicks);
-        if (Iris.enabled) {
+        if (false) {
             GbufferPrograms.endBlockEntities();
         }
         this.mc.entityRenderer.disableLightmap(partialTicks);
@@ -283,14 +256,6 @@ public class MixinRenderGlobal implements IRenderGlobalExt {
 
         AngelicaRenderQueue.recordFrameStats(tasksRan, System.nanoTime() - startTime);
         return true;
-    }
-
-    @Unique
-    private void iris$beginTranslucents(WorldRenderingPipeline pipeline, Camera camera) {
-        pipeline.beginHand();
-        HandRenderer.INSTANCE.renderSolid(camera.getPartialTicks(), camera, mc.renderGlobal, pipeline);
-        mc.mcProfiler.endStartSection("iris_pre_translucent");
-        pipeline.beginTranslucents();
     }
 
     @Redirect(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isInRangeToRender3d(DDD)Z"))

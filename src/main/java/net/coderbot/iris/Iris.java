@@ -20,9 +20,6 @@ public class Iris {
 
     public static final IrisLogging logger = new IrisLogging(MODNAME);
 
-    // Cached at class load - config must be loaded before Iris. Do not change at runtime.
-    public static final boolean enabled = false;
-
     @Getter
     private static final int shaderPackLoadId = 0;
 
@@ -48,7 +45,7 @@ public class Iris {
     @NotNull
     public static PipelineManager getPipelineManager() {
         if (pipelineManager == null) {
-            pipelineManager = new PipelineManager(null);
+            pipelineManager = new PipelineManager();
         }
 
         return pipelineManager;

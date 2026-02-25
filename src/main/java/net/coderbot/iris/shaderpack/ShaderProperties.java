@@ -215,7 +215,6 @@ public class ShaderProperties {
 			handleBooleanDirective(key, value, "backFace.cutoutMipped", bool -> backFaceCutoutMipped = bool);
 			handleBooleanDirective(key, value, "backFace.translucent", bool -> backFaceTranslucent = bool);
 			handleBooleanDirective(key, value, "rain.depth", bool -> rainDepth = bool);
-			handleBooleanDirective(key, value, "allowConcurrentCompute", bool -> concurrentCompute = bool);
 			handleBooleanDirective(key, value, "beacon.beam.depth", bool -> beaconBeamDepth = bool);
 			handleBooleanDirective(key, value, "separateAo", bool -> separateAo = bool);
 			handleBooleanDirective(key, value, "voxelizeLightBlocks", bool -> voxelizeLightBlocks = bool);

@@ -52,7 +52,7 @@ public class SodiumGameOptionPages {
                 .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                 .build());
 
-        if(Iris.enabled) {
+        if(false) {
             final OptionImpl<GameSettings, Integer> maxShadowDistanceSlider = OptionImpl.createBuilder(int.class, vanillaOpts)
                 .setName(I18n.format("options.iris.shadowDistance"))
                 .setTooltip(I18n.format("options.iris.shadowDistance.sodium_tooltip"))

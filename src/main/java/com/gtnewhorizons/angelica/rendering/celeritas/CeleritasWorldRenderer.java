@@ -9,7 +9,6 @@ import com.gtnewhorizons.angelica.rendering.RenderingState;
 import com.gtnewhorizons.angelica.rendering.TileEntityRenderBoundsRegistry;
 import com.gtnewhorizons.angelica.rendering.celeritas.api.IrisShaderProvider;
 import com.gtnewhorizons.angelica.rendering.celeritas.api.IrisShaderProviderHolder;
-import net.coderbot.iris.pipeline.ShadowRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
@@ -52,10 +51,10 @@ public class CeleritasWorldRenderer extends SimpleWorldRenderer<WorldClient, Ang
     private static final double MAX_ENTITY_CHECK_VOLUME = 16 * 16 * 16 * 15;
 
     // For sorting transparent TESRs
-    private RenderSectionOrderer renderSectionOrderer = new RenderSectionOrderer();
-    private TileEntityOrderer tileEntityOrderer = new TileEntityOrderer();
-    private ArrayList<RenderSection> sortedRenderSections = new ArrayList<>();
-    private ArrayList<TileEntity> sortedTileEntities = new ArrayList<>();
+    private final RenderSectionOrderer renderSectionOrderer = new RenderSectionOrderer();
+    private final TileEntityOrderer tileEntityOrderer = new TileEntityOrderer();
+    private final ArrayList<RenderSection> sortedRenderSections = new ArrayList<>();
+    private final ArrayList<TileEntity> sortedTileEntities = new ArrayList<>();
 
     private CeleritasWorldRenderer(Minecraft mc) {
         // Private constructor for singleton
@@ -112,9 +111,8 @@ public class CeleritasWorldRenderer extends SimpleWorldRenderer<WorldClient, Ang
 
     @Override
     protected ChunkRenderMatrices createChunkRenderMatrices() {
-        final boolean shadowPass = renderSectionManager.isInShadowPass();
-        final Matrix4f projection = shadowPass ? ShadowRenderer.PROJECTION : RenderingState.INSTANCE.getProjectionMatrix();
-        final Matrix4f modelView = shadowPass ? ShadowRenderer.MODELVIEW : RenderingState.INSTANCE.getModelViewMatrix();
+        final Matrix4f projection =RenderingState.INSTANCE.getProjectionMatrix();
+        final Matrix4f modelView = RenderingState.INSTANCE.getModelViewMatrix();
         return new ChunkRenderMatrices(projection, modelView);
     }
 
@@ -163,54 +161,6 @@ public class CeleritasWorldRenderer extends SimpleWorldRenderer<WorldClient, Ang
         if (DynamicLights.isEnabled() && DynamicLights.FrustumCullingEnabled) {
             DynamicLights.get().processChunkRebuilds(viewport);
         }
-
-        // Collect tile entities for shadow pass rendering
-        if (renderSectionManager.isInShadowPass() && IrisShaderProviderHolder.isActive()) {
-            collectTileEntitiesForShadow();
-        }
-    }
-
-    public void setCurrentViewport(Viewport viewport) {
-        this.currentViewport = viewport;
-    }
-
-    @SuppressWarnings("unchecked")
-    private void collectTileEntitiesForShadow() {
-        final SortedRenderLists renderLists = renderSectionManager.getRenderLists();
-        final Iterator<ChunkRenderList> renderListIterator = renderLists.iterator();
-
-        while (renderListIterator.hasNext()) {
-            final var renderList = renderListIterator.next();
-            final var renderRegion = renderList.getRegion();
-            final var renderSectionIterator = renderList.sectionsWithEntitiesIterator();
-
-            if (renderSectionIterator == null) {
-                continue;
-            }
-
-            while (renderSectionIterator.hasNext()) {
-                final var renderSectionId = renderSectionIterator.nextByteAsInt();
-                final var renderSection = renderRegion.getSection(renderSectionId);
-
-                if (renderSection == null) {
-                    continue;
-                }
-
-                final var context = renderSection.getBuiltContext();
-                if (context instanceof MinecraftBuiltRenderSectionData<?, ?> mcData) {
-                    final var culledEntities = (List<TileEntity>) mcData.culledBlockEntities;
-                    ShadowRenderer.visibleTileEntities.addAll(culledEntities);
-                }
-            }
-        }
-
-        for (var renderSection : renderSectionManager.getSectionsWithGlobalEntities()) {
-            final var context = renderSection.getBuiltContext();
-            if (context instanceof MinecraftBuiltRenderSectionData<?, ?> mcData) {
-                final var globalEntities = (List<TileEntity>) mcData.globalBlockEntities;
-                ShadowRenderer.globalTileEntities.addAll(globalEntities);
-            }
-        }
     }
 
     @Override
@@ -228,8 +178,7 @@ public class CeleritasWorldRenderer extends SimpleWorldRenderer<WorldClient, Ang
         GLStateManager.glColor4f(1, 1, 1, 1);
     }
 
-    private int renderCulledTileEntities(TileEntityRenderContext renderContext) {
-        int count = 0;
+    private void renderCulledTileEntities(TileEntityRenderContext renderContext) {
         sortedTileEntities.clear();
         SortedRenderLists renderLists = renderSectionManager.getRenderLists();
         Iterator<ChunkRenderList> renderListIterator = renderLists.iterator();
@@ -274,11 +223,9 @@ public class CeleritasWorldRenderer extends SimpleWorldRenderer<WorldClient, Ang
         sortedTileEntities.sort(tileEntityOrderer.setLastCameraState(lastCameraState));
         this.renderBlockEntityList(sortedTileEntities, renderContext);
 
-        return sortedTileEntities.size();
     }
 
-    private int renderGlobalTileEntities(TileEntityRenderContext renderContext) {
-        int count = 0;
+    private void renderGlobalTileEntities(TileEntityRenderContext renderContext) {
         sortedRenderSections.clear();
         sortedRenderSections.addAll(renderSectionManager.getSectionsWithGlobalEntities());
         sortedRenderSections.sort(renderSectionOrderer.setLastCameraState(lastCameraState));
@@ -301,25 +248,21 @@ public class CeleritasWorldRenderer extends SimpleWorldRenderer<WorldClient, Ang
                 if (te.shouldRenderInPass(renderContext.pass)) sortedTileEntities.add(te);
             }
 
-            count += sortedTileEntities.size();
-
             sortedTileEntities.sort(tileEntityOrderer.setLastCameraState(lastCameraState));
             this.renderBlockEntityList(sortedTileEntities, renderContext);
         }
 
-        return count;
     }
 
-    public int renderBlockEntities(float partialTicks) {
+    public void renderBlockEntities(float partialTicks) {
         final int pass = MinecraftForgeClient.getRenderPass();
         teRenderContext.set(partialTicks, pass);
         if (pass == 0 || !AngelicaMod.options().performance.translucencySorting) {
-            return super.renderBlockEntities(teRenderContext);
+            super.renderBlockEntities(teRenderContext);
+            return;
         }
-        int count = 0;
-        count += this.renderCulledTileEntities(teRenderContext);
-        count += this.renderGlobalTileEntities(teRenderContext);
-        return count;
+        this.renderCulledTileEntities(teRenderContext);
+        this.renderGlobalTileEntities(teRenderContext);
     }
 
     private void renderTE(TileEntity tileEntity, int pass, float partialTicks) {

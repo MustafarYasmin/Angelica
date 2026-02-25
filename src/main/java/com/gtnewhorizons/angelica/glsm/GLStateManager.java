@@ -1,6 +1,5 @@
 package com.gtnewhorizons.angelica.glsm;
 
-import com.gtnewhorizon.gtnhlib.client.opengl.GLCaps;
 import com.gtnewhorizon.gtnhlib.client.opengl.UniversalVAO;
 import com.gtnewhorizon.gtnhlib.bytebuf.MemoryUtilities;
 import com.gtnewhorizon.gtnhlib.client.renderer.vertex.VertexFlags;
@@ -48,12 +47,9 @@ import it.unimi.dsi.fastutil.ints.IntStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.gbuffer_overrides.state.StateTracker;
 import net.coderbot.iris.gl.blending.AlphaTestStorage;
 import net.coderbot.iris.gl.blending.BlendModeStorage;
 import net.coderbot.iris.gl.blending.DepthColorStorage;
-import net.coderbot.iris.samplers.IrisSamplers;
 import net.coderbot.iris.texture.pbr.PBRTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -515,7 +511,6 @@ public class GLStateManager {
 
     public static void init() {
         RenderSystem.initRenderer();
-        IrisSamplers.initRenderer();
 
         if(BYPASS_CACHE) {
             LOGGER.info("GLStateManager cache bypassed");
@@ -1109,7 +1104,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (BlendModeStorage.isBlendLocked()) {
                 BlendModeStorage.deferBlendModeToggle(true);
                 return;
@@ -1126,7 +1121,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (BlendModeStorage.isBlendLocked()) {
                 BlendModeStorage.deferBlendModeToggle(false);
                 return;
@@ -1165,7 +1160,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (BlendModeStorage.isBlendLocked()) {
                 BlendModeStorage.deferBlendFunc(srcFactor, dstFactor, srcFactor, dstFactor);
                 return;
@@ -1224,7 +1219,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (BlendModeStorage.isBlendLocked()) {
                 BlendModeStorage.deferBlendFunc(srcRgb, dstRgb, srcAlpha, dstAlpha);
                 return;
@@ -1314,7 +1309,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (DepthColorStorage.isDepthColorLocked()) {
                 DepthColorStorage.deferDepthEnable(mask);
                 return;
@@ -1463,7 +1458,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (DepthColorStorage.isDepthColorLocked()) {
                 DepthColorStorage.deferColorMask(red, green, blue, alpha);
                 return;
@@ -1520,7 +1515,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (AlphaTestStorage.isAlphaTestLocked()) {
                 AlphaTestStorage.deferAlphaTestToggle(true);
                 return;
@@ -1537,7 +1532,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (AlphaTestStorage.isAlphaTestLocked()) {
                 AlphaTestStorage.deferAlphaTestToggle(false);
                 return;
@@ -1554,7 +1549,7 @@ public class GLStateManager {
                 return;
             }
         }
-        if (Iris.enabled) {
+        if (false) {
             if (AlphaTestStorage.isAlphaTestLocked()) {
                 AlphaTestStorage.deferAlphaFunc(function, reference);
                 return;
@@ -1816,21 +1811,6 @@ public class GLStateManager {
             }
         }
         final int textureUnit = getActiveTextureUnit();
-        if (Iris.enabled) {
-            // Iris
-            boolean updatePipeline = false;
-            if (textureUnit == IrisSamplers.ALBEDO_TEXTURE_UNIT) {
-                StateTracker.INSTANCE.albedoSampler = true;
-                updatePipeline = true;
-            } else if (textureUnit == IrisSamplers.LIGHTMAP_TEXTURE_UNIT) {
-                StateTracker.INSTANCE.lightmapSampler = true;
-                updatePipeline = true;
-            }
-
-            if (updatePipeline) {
-                Iris.getPipelineManager().getPipeline().ifPresent(p -> p.setInputs(StateTracker.INSTANCE.getInputs()));
-            }
-        }
         textures.getTextureUnitStates(textureUnit).enable();
     }
 
@@ -1843,21 +1823,6 @@ public class GLStateManager {
             }
         }
         final int textureUnit = getActiveTextureUnit();
-        if (Iris.enabled) {
-            // Iris
-            boolean updatePipeline = false;
-            if (textureUnit == IrisSamplers.ALBEDO_TEXTURE_UNIT) {
-                StateTracker.INSTANCE.albedoSampler = false;
-                updatePipeline = true;
-            } else if (textureUnit == IrisSamplers.LIGHTMAP_TEXTURE_UNIT) {
-                StateTracker.INSTANCE.lightmapSampler = false;
-                updatePipeline = true;
-            }
-
-            if (updatePipeline) {
-                Iris.getPipelineManager().getPipeline().ifPresent(p -> p.setInputs(StateTracker.INSTANCE.getInputs()));
-            }
-        }
         textures.getTextureUnitStates(textureUnit).disable();
     }
 
@@ -2609,7 +2574,7 @@ public class GLStateManager {
     private static void onDeleteTexture(int id) {
         TextureTracker.INSTANCE.onDeleteTexture(id);
         TextureInfoCache.INSTANCE.onDeleteTexture(id);
-        if (Iris.enabled) {
+        if (false) {
             PBRTextureManager.INSTANCE.onDeleteTexture(id);
         }
 
