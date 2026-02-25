@@ -32,7 +32,7 @@ public abstract class MixinForgeHooksClient_CoreProfile {
         final ContextAttribs attribs33 = new ContextAttribs(3, 3)
             .withProfileCore(true)
             .withForwardCompatible(true);
-        final ContextAttribs attribs46 = new ContextAttribs(4, 6)
+        final ContextAttribs attribs45 = new ContextAttribs(4, 5)
             .withProfileCore(true)
             .withForwardCompatible(true);
 
@@ -41,7 +41,7 @@ public abstract class MixinForgeHooksClient_CoreProfile {
 
         if (!wantStencil) {
             try {
-                Display.create(format, attribs46);
+                Display.create(format, attribs45);
             } catch (LWJGLException e) {
                 try {
                     Display.create(format, attribs33);
@@ -55,11 +55,11 @@ public abstract class MixinForgeHooksClient_CoreProfile {
         }
 
         try {
-            Display.create(format.withStencilBits(8), attribs46);
+            Display.create(format.withStencilBits(8), attribs45);
             stencilBits = 8;
         } catch (LWJGLException e) {
             try {
-                Display.create(format, attribs46);
+                Display.create(format, attribs45);
                 stencilBits = 0;
             } catch (LWJGLException e2) {
                 try {
