@@ -1,4 +1,4 @@
-Just a meme fork trying to remove the "bloat" like iris shaders, currently WIP.
+Just a personal fork trying out some random stuff, like removing iris or adding more modern opengl stuff.
 
 # Angelica<img src="img/logo-readme.png" align="right">
 
