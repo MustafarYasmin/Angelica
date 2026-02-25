@@ -59,7 +59,7 @@ public class RenderSystem {
 
 	public static void initRenderer() {
         try {
-            if (dsaState == null && GLStateManager.capabilities.OpenGL45) {
+            if (GLStateManager.capabilities.OpenGL45) {
                 dsaState = (GLStateManager.capabilities.GL_EXT_direct_state_access) ? new DSAEXT() : new DSACore();
                 LOGGER.info("OpenGL 4.5 detected, enabling DSA.");
             }
