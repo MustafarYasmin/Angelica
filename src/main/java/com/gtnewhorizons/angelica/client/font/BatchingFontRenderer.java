@@ -44,14 +44,12 @@ public class BatchingFontRenderer {
     /** The underlying FontRenderer object that's being accelerated */
     protected FontRenderer underlying;
     /** Array of width of all the characters in default.png */
-    protected int[] charWidth = new int[256];
-    /** Array of the start/end column (in upper/lower nibble) for every glyph in the /font directory. */
-    protected byte[] glyphWidth;
+    protected int[] charWidth;
     /**
      * Array of RGB triplets defining the 16 standard chat colors followed by 16 darker version of the same colors for
      * drop shadows.
      */
-    private int[] colorCode;
+    private final int[] colorCode;
     /** Location of the primary font atlas to bind. */
     protected final ResourceLocation locationFontTexture;
 
@@ -126,9 +124,6 @@ public class BatchingFontRenderer {
     private final ObjectArrayList<FontDrawCmd> batchCommands = ObjectArrayList.wrap(new FontDrawCmd[64], 0);
     private final ObjectArrayList<FontDrawCmd> batchCommandPool = ObjectArrayList.wrap(new FontDrawCmd[64], 0);
 
-    private int blendSrcRGB = GL11.GL_SRC_ALPHA;
-    private int blendDstRGB = GL11.GL_ONE_MINUS_SRC_ALPHA;
-
     /**  */
     private void pushVtx(float x, float y, int rgba, float u, float v, float uMin, float uMax, float vMin, float vMax) {
         final int oldCap = batchVtxPositions.capacity() / 2;
@@ -179,7 +174,7 @@ public class BatchingFontRenderer {
         pushQuadIdx(vtxId);
     }
 
-    private int pushQuadIdx(int startV) {
+    private void pushQuadIdx(int startV) {
         final int idx = idxWriterIndex;
         batchIndices.put(idx, startV);
         batchIndices.put(idx + 1, startV + 1);
@@ -189,12 +184,11 @@ public class BatchingFontRenderer {
         batchIndices.put(idx + 4, startV + 1);
         batchIndices.put(idx + 5, startV + 3);
         idxWriterIndex += 6;
-        return idx;
     }
 
     private void pushDrawCmd(int startIdx, int idxCount, ResourceLocation texture, boolean isUnicode) {
         if (!batchCommands.isEmpty()) {
-            final FontDrawCmd lastCmd = batchCommands.get(batchCommands.size() - 1);
+            final FontDrawCmd lastCmd = batchCommands.getLast();
             final int prevEndVtx = lastCmd.startVtx + lastCmd.idxCount;
             if (prevEndVtx == startIdx && lastCmd.texture == texture) {
                 // Coalesce into one
@@ -230,7 +224,7 @@ public class BatchingFontRenderer {
         public boolean equals(Object obj) {
             if (obj == this) return true;
             if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (FontDrawCmd) obj;
+            final FontDrawCmd that = (FontDrawCmd) obj;
             return this.startVtx == that.startVtx && this.idxCount == that.idxCount && Objects.equals(this.texture,
                 that.texture);
         }
@@ -311,6 +305,8 @@ public class BatchingFontRenderer {
         GLStateManager.enableTexture();
         GLStateManager.enableAlphaTest();
         GLStateManager.enableBlend();
+        final int blendSrcRGB = GL11.GL_SRC_ALPHA;
+        final int blendDstRGB = GL11.GL_ONE_MINUS_SRC_ALPHA;
         GLStateManager.tryBlendFuncSeparate(blendSrcRGB, blendDstRGB, GL11.GL_ONE, GL11.GL_ZERO);
         GLStateManager.glShadeModel(GL11.GL_FLAT);
 
@@ -483,8 +479,7 @@ public class BatchingFontRenderer {
             boolean curStrikethrough = false;
             boolean curUnderline = false;
 
-            float glyphScaleY = getGlyphScaleY();
-            float glyphScaleX = getGlyphScaleX();
+            final float glyphScaleY = getGlyphScaleY();
             float heightNorth = anchorY + (underlying.FONT_HEIGHT - 1.0f) * (0.5f - glyphScaleY / 2);
 
             final float underlineY = heightNorth + (underlying.FONT_HEIGHT - 1.0f) * glyphScaleY;
@@ -561,10 +556,10 @@ public class BatchingFontRenderer {
                 }
 
                 if (FontConfig.enableCustomFont && FontConfig.enableGlyphReplacements) {
-                    String chrReplacement = GlyphReplacements.customGlyphs.get(String.valueOf(chr));
+                    final String chrReplacement = GlyphReplacements.customGlyphs.get(String.valueOf(chr));
                     if (chrReplacement != null) {
-                        char replacement = chrReplacement.charAt(0);
-                        boolean isReplacementCharAvailable =
+                        final char replacement = chrReplacement.charAt(0);
+                        final boolean isReplacementCharAvailable =
                             FontProviderCustom.getPrimary().isGlyphAvailable(replacement)
                                 || FontProviderCustom.getFallback().isGlyphAvailable(replacement);
                         if (isReplacementCharAvailable) {
@@ -577,10 +572,10 @@ public class BatchingFontRenderer {
                     chr = FontProviderMC.get(this.isSGA).getRandomReplacement(chr);
                 }
 
-                FontProvider fontProvider = FontStrategist.getFontProvider(this, chr, FontConfig.enableCustomFont, unicodeFlag);
+                final FontProvider fontProvider = FontStrategist.getFontProvider(this, chr, FontConfig.enableCustomFont, unicodeFlag);
 
                 heightNorth = anchorY + (underlying.FONT_HEIGHT - 1.0f) * (0.5f - glyphScaleY * fontProvider.getYScaleMultiplier() / 2);
-                float heightSouth = (underlying.FONT_HEIGHT - 1.0f) * glyphScaleY * fontProvider.getYScaleMultiplier();
+                final float heightSouth = (underlying.FONT_HEIGHT - 1.0f) * glyphScaleY * fontProvider.getYScaleMultiplier();
 
                 // Check ASCII space, NBSP, NNBSP
                 if (chr == ' ' || chr == '\u00A0' || chr == '\u202F') {
@@ -590,6 +585,7 @@ public class BatchingFontRenderer {
 
                 final float uStart = fontProvider.getUStart(chr);
                 final float vStart = fontProvider.getVStart(chr);
+                final float glyphScaleX = getGlyphScaleX();
                 final float xAdvance = fontProvider.getXAdvance(chr) * glyphScaleX;
                 final float glyphW = fontProvider.getGlyphW(chr) * glyphScaleX;
                 final float uSz = fontProvider.getUSize(chr);
@@ -668,18 +664,9 @@ public class BatchingFontRenderer {
             return 4 * this.getWhitespaceScale();
         }
 
-        FontProvider fp = FontStrategist.getFontProvider(this, chr, FontConfig.enableCustomFont, underlying.getUnicodeFlag());
+        final FontProvider fp = FontStrategist.getFontProvider(this, chr, FontConfig.enableCustomFont, underlying.getUnicodeFlag());
 
         return fp.getXAdvance(chr) * this.getGlyphScaleX();
     }
 
-    public void overrideBlendFunc(int srcRgb, int dstRgb) {
-        blendSrcRGB = srcRgb;
-        blendDstRGB = dstRgb;
-    }
-
-    public void resetBlendFunc() {
-        blendSrcRGB = GL11.GL_SRC_ALPHA;
-        blendDstRGB = GL11.GL_ONE_MINUS_SRC_ALPHA;
-    }
 }
