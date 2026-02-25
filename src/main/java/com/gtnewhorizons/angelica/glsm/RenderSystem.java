@@ -1,9 +1,6 @@
 package com.gtnewhorizons.angelica.glsm;
 
-import com.gtnewhorizons.angelica.glsm.dsa.DSAARB;
-import com.gtnewhorizons.angelica.glsm.dsa.DSAAccess;
-import com.gtnewhorizons.angelica.glsm.dsa.DSACore;
-import com.gtnewhorizons.angelica.glsm.dsa.DSAUnsupported;
+import com.gtnewhorizons.angelica.glsm.dsa.*;
 import com.gtnewhorizons.angelica.glsm.ffp.ShaderManager;
 import com.gtnewhorizons.angelica.glsm.texture.TextureInfoCache;
 import net.coderbot.iris.gl.shader.StandardMacros;
@@ -62,8 +59,8 @@ public class RenderSystem {
 
 	public static void initRenderer() {
         try {
-            if (GLStateManager.capabilities.OpenGL45) {
-                dsaState = new DSACore();
+            if (dsaState == null && GLStateManager.capabilities.OpenGL45) {
+                dsaState = (GLStateManager.capabilities.GL_EXT_direct_state_access) ? new DSAEXT() : new DSACore();
                 LOGGER.info("OpenGL 4.5 detected, enabling DSA.");
             }
 
@@ -147,9 +144,7 @@ public class RenderSystem {
 	public static void texImage2D(int texture, int target, int level, int internalformat, int width, int height, int border, int format, int type, @Nullable ByteBuffer pixels) {
 		GLStateManager.glBindTexture(target, texture);
 		GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-		if (target == GL11.GL_TEXTURE_2D && level == 0) {
-			TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-		}
+        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height);
 	}
 
 	public static void uniformMatrix4fv(int location, boolean transpose, FloatBuffer matrix) {

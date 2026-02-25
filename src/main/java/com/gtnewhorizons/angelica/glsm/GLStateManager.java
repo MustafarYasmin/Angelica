@@ -1594,7 +1594,7 @@ public class GLStateManager {
                 return;
             }
         }
-        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height);
         if (shouldUseDSA(target)) {
             // Use DSA to upload directly to the texture
             RenderSystem.textureImage2D(getBoundTextureForServerState(), target, level, internalformat, width, height, border, format, type, pixels);
@@ -1612,7 +1612,7 @@ public class GLStateManager {
                 return;
             }
         }
-        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height);
         // FloatBuffer not in DSA interface - use direct GL call
         GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
     }
@@ -1625,7 +1625,7 @@ public class GLStateManager {
                 return;
             }
         }
-        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height);
         // DoubleBuffer not in DSA interface - use direct GL call
         GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
     }
@@ -1638,7 +1638,7 @@ public class GLStateManager {
                 return;
             }
         }
-        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height, border, format, type, pixels != null ? pixels.asIntBuffer() : null);
+        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height);
         if (shouldUseDSA(target)) {
             // Use DSA to upload directly to the texture - keeps GL binding state unchanged
             RenderSystem.textureImage2D(getBoundTextureForServerState(), target, level, internalformat, width, height, border, format, type, pixels);
@@ -1652,7 +1652,7 @@ public class GLStateManager {
         if (DisplayListManager.isRecording()) {
             throw new UnsupportedOperationException("glTexImage2D with buffer offset in display lists not yet supported");
         }
-        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height, border, format, type, pixels_buffer_offset);
+        TextureInfoCache.INSTANCE.onTexImage2D(target, level, internalformat, width, height);
         GL11.glTexImage2D(target, level, internalformat, width, height, border, format, type, pixels_buffer_offset);
     }
 
