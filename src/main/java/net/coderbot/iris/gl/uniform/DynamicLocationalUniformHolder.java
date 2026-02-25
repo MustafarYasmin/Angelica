@@ -11,7 +11,7 @@ import java.util.function.IntSupplier;
 import java.util.function.Supplier;
 
 public interface DynamicLocationalUniformHolder extends LocationalUniformHolder, DynamicUniformHolder {
-	DynamicLocationalUniformHolder addDynamicUniform(Uniform uniform, ValueUpdateNotifier notifier);
+	void addDynamicUniform(Uniform uniform, ValueUpdateNotifier notifier);
 
 	default DynamicLocationalUniformHolder uniform1f(String name, FloatSupplier value, ValueUpdateNotifier notifier) {
 		location(name, UniformType.FLOAT).ifPresent(id -> addDynamicUniform(new FloatUniform(id, value, notifier), notifier));

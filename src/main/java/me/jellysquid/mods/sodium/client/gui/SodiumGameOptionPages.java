@@ -22,15 +22,12 @@ import me.jellysquid.mods.sodium.client.gui.options.named.ParticleMode;
 import me.jellysquid.mods.sodium.client.gui.options.storage.AngelicaOptionsStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.MinecraftOptionsStorage;
 import me.jellysquid.mods.sodium.client.gui.options.storage.SodiumOptionsStorage;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.gui.option.IrisVideoSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.GameSettings;
 import org.embeddedt.embeddium.impl.render.chunk.occlusion.AsyncOcclusionMode;
 import org.lwjgl.opengl.Display;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,28 +48,6 @@ public class SodiumGameOptionPages {
                 .setImpact(OptionImpact.HIGH)
                 .setFlags(OptionFlag.REQUIRES_RENDERER_RELOAD)
                 .build());
-
-        if(false) {
-            final OptionImpl<GameSettings, Integer> maxShadowDistanceSlider = OptionImpl.createBuilder(int.class, vanillaOpts)
-                .setName(I18n.format("options.iris.shadowDistance"))
-                .setTooltip(I18n.format("options.iris.shadowDistance.sodium_tooltip"))
-                .setControl(option -> new SliderControl(option, 0, 32, 1, ControlValueFormatter.quantity("options.chunks")))
-                .setBinding((_, value) -> {
-                        IrisVideoSettings.shadowDistance = value;
-                        try {
-                            Iris.getIrisConfig().save();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    },
-                    _ -> IrisVideoSettings.getOverriddenShadowDistance(IrisVideoSettings.shadowDistance))
-                .setImpact(OptionImpact.HIGH)
-                .setEnabled(true)
-                .build();
-
-            maxShadowDistanceSlider.iris$dynamicallyEnable(IrisVideoSettings::isShadowDistanceSliderEnabled);
-            firstGroupBuilder.add(maxShadowDistanceSlider).build();
-        }
 
         firstGroupBuilder.add(OptionImpl.createBuilder(int.class, vanillaOpts)
                 .setName(I18n.format("options.gamma"))

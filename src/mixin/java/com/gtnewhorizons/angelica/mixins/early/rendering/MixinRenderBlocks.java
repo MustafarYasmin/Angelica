@@ -9,7 +9,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import net.coderbot.iris.block_rendering.BlockRenderingSettings;
 import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderBlocks;
@@ -102,7 +101,7 @@ public abstract class MixinRenderBlocks {
     @Inject(method = { "renderStandardBlockWithAmbientOcclusion", "renderStandardBlockWithAmbientOcclusionPartial" }, at = @At("HEAD"), cancellable = true)
     private void handleCeleritasAo(Block block, int x, int y, int z, float r, float g, float b, CallbackInfoReturnable<Boolean> cir) {
         if ((this.isRenderingByType && Minecraft.isAmbientOcclusionEnabled() && AngelicaMod.options().quality.useCeleritasSmoothLighting) ||
-            (false && BlockRenderingSettings.INSTANCE.shouldUseSeparateAo())) {
+            (false && false)) {
             this.applyingCeleritasAO = true;
             try {
                 cir.setReturnValue(this.renderStandardBlockWithColorMultiplier(block, x, y, z, r, g, b));

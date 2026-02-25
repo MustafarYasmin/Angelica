@@ -1,6 +1,5 @@
 package com.gtnewhorizons.angelica.glsm.ffp;
 
-import com.gtnewhorizon.gtnhlib.client.renderer.stacks.IStateStack;
 import com.gtnewhorizon.gtnhlib.client.renderer.vertex.VertexFlags;
 import com.gtnewhorizon.gtnhlib.client.renderer.vertex.VertexFormat;
 import com.gtnewhorizons.angelica.glsm.CompatUniformManager;
@@ -9,7 +8,6 @@ import com.gtnewhorizons.angelica.glsm.stacks.Vec3fStack;
 import com.gtnewhorizons.angelica.glsm.stacks.Vec4fStack;
 import it.unimi.dsi.fastutil.ints.Int2IntOpenHashMap;
 import lombok.Getter;
-import net.coderbot.iris.gl.blending.BlendModeStorage;
 import net.minecraft.launchwrapper.Launch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -65,7 +63,7 @@ public class ShaderManager {
     public void enable() {
         enabled = true;
 
-        VertexFormat.registerSetupBufferStateOverride((format, offset) -> {
+        VertexFormat.registerSetupBufferStateOverride((format, _) -> {
             currentVertexFlags = format.getVertexFlags();
             final int boundVao = GLStateManager.getBoundVAO();
             if (boundVao != 0) {
@@ -83,7 +81,7 @@ public class ShaderManager {
 
     public void activate() {
         active = true;
-        updateVariant(true, true, true, true);
+        updateVariant();
         uploadUniforms();
     }
 
@@ -98,7 +96,6 @@ public class ShaderManager {
 
     public void preDraw(boolean hasColor, boolean hasNormal, boolean hasTexCoord, boolean hasLightmap) {
         GLStateManager.flushDeferredVertexAttribs();
-        BlendModeStorage.flushDeferredBlend();
 
         if (!active) {
             if (enabled) {
@@ -141,8 +138,8 @@ public class ShaderManager {
         preDraw(currentVertexFlags);
     }
 
-    private void updateVariant(boolean hasColor, boolean hasNormal, boolean hasTexCoord, boolean hasLightmap) {
-        currentVertexKeyPacked = VertexKey.packFromState(hasColor, hasNormal, hasTexCoord, hasLightmap);
+    private void updateVariant() {
+        currentVertexKeyPacked = VertexKey.packFromState(true, true, true, true);
         currentFragmentKeyPacked = FragmentKey.packFromState();
 
         currentProgram = cache.getOrCreate(currentVertexKeyPacked, currentFragmentKeyPacked);

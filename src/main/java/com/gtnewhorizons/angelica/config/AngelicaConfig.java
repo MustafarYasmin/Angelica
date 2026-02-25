@@ -197,10 +197,6 @@ public class AngelicaConfig {
     })
     public static String[] blockCrackFixRenderPassWhitelist__;
 
-    @Config.Comment("Register HardcodedCustomUniforms in Iris Shaders. May help with compatibility in certain shader packs")
-    @Config.DefaultBoolean(false)
-    public static boolean enableHardcodedCustomUniforms;
-
     @Config.Comment("Define IS_IRIS in shader macros.")
     @Config.DefaultBoolean(true)
     public static boolean defineIsIris;

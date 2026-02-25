@@ -5,7 +5,6 @@ import com.gtnewhorizons.angelica.config.AngelicaConfig;
 import lombok.Getter;
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.texture.util.TextureExporter;
-import net.coderbot.iris.texture.util.TextureManipulationUtil;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.client.renderer.texture.TextureUtil;
@@ -15,9 +14,7 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,23 +35,14 @@ public class PBRAtlasTexture extends AutoClosableAbstractTexture {
 
 	}
 
-    public ResourceLocation getAtlasId() {
-		return id;
-	}
-
-	public void addSprite(TextureAtlasSprite sprite) {
+    public void addSprite(TextureAtlasSprite sprite) {
 		sprites.put(texMap.completeResourceLocation(new ResourceLocation(sprite.getIconName()), 0), sprite);
 		if (sprite.hasAnimationMetadata()) {
 			animatedSprites.add(sprite);
 		}
 	}
 
-	@Nullable
-	public TextureAtlasSprite getSprite(ResourceLocation id) {
-		return sprites.get(id);
-	}
-
-	public void clear() {
+    public void clear() {
 		sprites.clear();
 		animatedSprites.clear();
 	}
@@ -62,7 +50,6 @@ public class PBRAtlasTexture extends AutoClosableAbstractTexture {
 	public void upload(int atlasWidth, int atlasHeight, int mipLevel, float anisotropicFiltering) {
 		final int glId = getGlTextureId();
 		TextureUtil.allocateTextureImpl(glId, mipLevel, atlasWidth, atlasHeight, anisotropicFiltering);
-		TextureManipulationUtil.fillWithColor(glId, mipLevel, type.getDefaultValue());
 
 		for (TextureAtlasSprite sprite : sprites.values()) {
 			try {
@@ -104,7 +91,7 @@ public class PBRAtlasTexture extends AutoClosableAbstractTexture {
 	}
 
     @Override
-    public void loadTexture(IResourceManager manager) throws IOException {
+    public void loadTexture(IResourceManager manager) {
         // todo
     }
 

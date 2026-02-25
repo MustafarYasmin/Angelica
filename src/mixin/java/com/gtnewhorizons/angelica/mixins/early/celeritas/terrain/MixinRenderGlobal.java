@@ -9,7 +9,6 @@ import com.gtnewhorizons.angelica.rendering.RenderingState;
 import com.gtnewhorizons.angelica.rendering.celeritas.BlockRenderLayer;
 import com.gtnewhorizons.angelica.rendering.celeritas.CeleritasSetup;
 import com.gtnewhorizons.angelica.rendering.celeritas.CeleritasWorldRenderer;
-import net.coderbot.iris.layer.GbufferPrograms;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.renderer.GLAllocation;
@@ -79,7 +78,7 @@ public class MixinRenderGlobal implements IRenderGlobalExt {
         this.celeritas$renderer = CeleritasWorldRenderer.create(mc);
     }
 
-    @Inject(method = "Lnet/minecraft/client/renderer/RenderGlobal;setWorldAndLoadRenderers(Lnet/minecraft/client/multiplayer/WorldClient;)V", at = @At("RETURN"))
+    @Inject(method = "setWorldAndLoadRenderers(Lnet/minecraft/client/multiplayer/WorldClient;)V", at = @At("RETURN"))
     private void celeritas$setWorldAndLoadRenderers(WorldClient world, CallbackInfo ci) {
         RenderDevice.enterManagedCode();
         try {
@@ -212,14 +211,7 @@ public class MixinRenderGlobal implements IRenderGlobalExt {
 
     @Inject(method = "renderEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderHelper;enableStandardItemLighting()V", shift = At.Shift.AFTER, ordinal = 0), cancellable = true)
     public void celeritas$renderTileEntities(EntityLivingBase entity, ICamera camera, float partialTicks, CallbackInfo ci) {
-        if (false) {
-            GbufferPrograms.beginBlockEntities();
-            GbufferPrograms.setBlockEntityDefaults();
-        }
         this.celeritas$renderer.renderBlockEntities(partialTicks);
-        if (false) {
-            GbufferPrograms.endBlockEntities();
-        }
         this.mc.entityRenderer.disableLightmap(partialTicks);
         this.mc.mcProfiler.endSection();
         ci.cancel();

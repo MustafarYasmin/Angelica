@@ -1,6 +1,5 @@
 package me.jellysquid.mods.sodium.client.gui;
 
-import com.google.common.collect.ImmutableList;
 import com.gtnewhorizons.angelica.client.gui.DynamicLightsOptionPages;
 import com.gtnewhorizons.angelica.client.gui.ScrollableGuiScreen;
 import com.gtnewhorizons.angelica.compat.mojang.Drawable;
@@ -49,8 +48,6 @@ public class SodiumOptionsGUI extends ScrollableGuiScreen {
     protected boolean hasPendingChanges;
     protected ControlElement<?> hoveredElement;
 
-    protected OptionPage shaderPacks;
-
 
     public SodiumOptionsGUI(GuiScreen prevScreen) {
         this.prevScreen = prevScreen;
@@ -67,11 +64,6 @@ public class SodiumOptionsGUI extends ScrollableGuiScreen {
             if (dlPage != null) {
                 this.pages.add(dlPage);
             }
-        }
-
-        if (false) {
-            shaderPacks = new OptionPage(I18n.format("options.iris.shaderPackSelection"), ImmutableList.of());
-            this.pages.add(shaderPacks);
         }
 
         this.pages.add(SodiumGameOptionPages.debug());

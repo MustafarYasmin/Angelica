@@ -4,8 +4,6 @@ import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import com.gtnewhorizons.angelica.glsm.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.coderbot.iris.Iris;
-import net.coderbot.iris.pipeline.WorldRenderingPipeline;
 import net.minecraft.client.renderer.texture.AbstractTexture;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,11 +21,7 @@ public class TextureTracker {
 	private TextureTracker() {
 	}
 
-	public void trackTexture(int id, AbstractTexture texture) {
-		textures.put(id, texture);
-	}
-
-	@Nullable
+    @Nullable
 	public AbstractTexture getTexture(int id) {
 		return textures.get(id);
 	}
@@ -38,13 +32,7 @@ public class TextureTracker {
 		}
 		if (GLStateManager.getActiveTextureUnit() == 0) {
 			lockBindCallback = true;
-            if(false) {
-                final WorldRenderingPipeline pipeline = Iris.getPipelineManager().getPipelineNullable();
-                if (pipeline != null) {
-                    pipeline.onBindTexture(id);
-                }
-            }
-			// Reset texture state
+            // Reset texture state
 			RenderSystem.bindTextureToUnit(0, id);
 			lockBindCallback = false;
 		}

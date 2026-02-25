@@ -5,12 +5,10 @@ import com.gtnewhorizons.angelica.dynamiclights.DynamicLights;
 import com.gtnewhorizons.angelica.dynamiclights.IDynamicLightSource;
 import com.gtnewhorizons.angelica.rendering.StateAwareTessellator;
 import com.gtnewhorizons.angelica.rendering.celeritas.iris.BlockRenderContext;
-import com.gtnewhorizons.angelica.rendering.celeritas.iris.IrisExtendedChunkVertexEncoder;
 import com.gtnewhorizons.angelica.rendering.celeritas.light.LightDataCache;
 import com.gtnewhorizons.angelica.rendering.celeritas.light.VanillaDiffuseProvider;
 import com.gtnewhorizons.angelica.rendering.celeritas.world.WorldSlice;
 import lombok.Getter;
-import net.coderbot.iris.block_rendering.BlockRenderingSettings;
 import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
@@ -18,7 +16,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IBlockAccess;
 import org.embeddedt.embeddium.impl.model.light.LightPipeline;
-import org.embeddedt.embeddium.impl.model.light.data.LightDataAccess;
 import org.embeddedt.embeddium.impl.model.light.data.QuadLightData;
 import org.embeddedt.embeddium.impl.model.light.flat.FlatLightPipeline;
 import org.embeddedt.embeddium.impl.model.light.smooth.SmoothLightPipeline;
@@ -33,7 +30,6 @@ import org.embeddedt.embeddium.impl.render.chunk.terrain.material.Material;
 import org.embeddedt.embeddium.impl.render.chunk.vertex.format.ChunkVertexEncoder;
 import org.embeddedt.embeddium.impl.util.QuadUtil;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class AngelicaChunkBuildContext extends ChunkBuildContext {
@@ -56,7 +52,6 @@ public class AngelicaChunkBuildContext extends ChunkBuildContext {
     private final VertexArrayQuadView quadView;
     private boolean lightPipelineReady = false;
     private int originX, originY, originZ;
-    private IBlockAccess blockAccess;
 
     public AngelicaChunkBuildContext(RenderPassConfiguration<?> renderPassConfiguration, WorldClient world) {
         super(renderPassConfiguration);
@@ -72,7 +67,6 @@ public class AngelicaChunkBuildContext extends ChunkBuildContext {
     }
 
     public void setupLightPipeline(IBlockAccess blockAccess, int minBlockX, int minBlockY, int minBlockZ) {
-        this.blockAccess = blockAccess;
         this.originX = minBlockX;
         this.originY = minBlockY;
         this.originZ = minBlockZ;
@@ -124,12 +118,11 @@ public class AngelicaChunkBuildContext extends ChunkBuildContext {
         }
 
         final boolean hasDynamicLights = chunkLightSources != null && !chunkLightSources.isEmpty();
-        final boolean separateAo = BlockRenderingSettings.INSTANCE.shouldUseSeparateAo();
         final boolean celeritasSmoothLighting = AngelicaMod.options().quality.useCeleritasSmoothLighting;
         final boolean shaderActive = IrisApi.getInstance().isShaderPackInUse();
-        final boolean useAoCalculation = lightPipelineReady && (separateAo || celeritasSmoothLighting || shaderActive);
-        final boolean shouldApplyDiffuse = !BlockRenderingSettings.INSTANCE.shouldDisableDirectionalShading();
-        final ChunkColorWriter colorEncoder = separateAo ? ChunkColorWriter.SEPARATE_AO : ChunkColorWriter.EMBEDDIUM;
+        final boolean useAoCalculation = lightPipelineReady && (celeritasSmoothLighting || shaderActive);
+        final boolean shouldApplyDiffuse = true;
+        final ChunkColorWriter colorEncoder = ChunkColorWriter.EMBEDDIUM;
 
         int ptr = 0;
         final int numQuads = vertexCount / 4;
@@ -220,10 +213,6 @@ public class AngelicaChunkBuildContext extends ChunkBuildContext {
 
             final Material correctMaterial = selectMaterial(material, sprite, isShaderPackOverride);
             final var builder = buffers.get(correctMaterial);
-
-            if (correctMaterial != material && builder.getEncoder() instanceof IrisExtendedChunkVertexEncoder iris) {
-                iris.setContext(blockRenderContext);
-            }
 
             builder.getVertexBuffer(facing).push(vertices, correctMaterial);
         }

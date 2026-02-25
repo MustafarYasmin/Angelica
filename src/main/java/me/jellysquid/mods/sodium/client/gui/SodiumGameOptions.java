@@ -8,7 +8,6 @@ import com.gtnewhorizons.angelica.AngelicaMod;
 import com.gtnewhorizons.angelica.glsm.GLStateManager;
 import me.jellysquid.mods.sodium.client.gui.options.named.GraphicsQuality;
 import me.jellysquid.mods.sodium.client.gui.options.named.MultiDrawMode;
-import net.coderbot.iris.Iris;
 import org.embeddedt.embeddium.impl.render.chunk.occlusion.AsyncOcclusionMode;
 
 import java.io.FileReader;
@@ -114,14 +113,5 @@ public class SodiumGameOptions {
         }
 
         Files.writeString(this.configPath, GSON.toJson(this));
-        if(false) {
-            try {
-                if (Iris.getIrisConfig() != null) {
-                    Iris.getIrisConfig().save();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 }

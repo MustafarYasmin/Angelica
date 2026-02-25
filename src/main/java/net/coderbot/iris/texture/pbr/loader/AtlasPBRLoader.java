@@ -6,8 +6,6 @@ import com.gtnewhorizons.angelica.glsm.texture.TextureInfo;
 import com.gtnewhorizons.angelica.glsm.texture.TextureInfoCache;
 import com.gtnewhorizons.angelica.mixins.interfaces.ISpriteExt;
 import net.coderbot.iris.Iris;
-import net.coderbot.iris.texture.format.TextureFormat;
-import net.coderbot.iris.texture.format.TextureFormatLoader;
 import net.coderbot.iris.texture.mipmap.ChannelMipmapGenerator;
 import net.coderbot.iris.texture.mipmap.CustomMipmapGenerator;
 import net.coderbot.iris.texture.mipmap.LinearBlendFunction;
@@ -224,16 +222,6 @@ public class AtlasPBRLoader implements PBRTextureLoader<TextureMap> {
 
         @Override
         public CustomMipmapGenerator getMipmapGenerator(TextureAtlasSpriteInfo info, int atlasWidth, int atlasHeight) {
-            if (info instanceof PBRTextureAtlasSpriteInfo pbrInfo) {
-                final PBRType pbrType = pbrInfo.pbrType;
-                final TextureFormat format = TextureFormatLoader.getFormat();
-                if (format != null) {
-                    final CustomMipmapGenerator generator = format.getMipmapGenerator(pbrType);
-                    if (generator != null) {
-                        return generator;
-                    }
-                }
-            }
             return LINEAR_MIPMAP_GENERATOR;
         }
     }

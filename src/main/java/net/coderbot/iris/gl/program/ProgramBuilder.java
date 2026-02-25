@@ -1,20 +1,12 @@
 package net.coderbot.iris.gl.program;
 
 import com.google.common.collect.ImmutableSet;
-import net.coderbot.iris.gl.image.ImageHolder;
-import net.coderbot.iris.gl.sampler.GlSampler;
-import net.coderbot.iris.gl.sampler.SamplerHolder;
 import net.coderbot.iris.gl.shader.GlShader;
 import net.coderbot.iris.gl.shader.ProgramCreator;
 import net.coderbot.iris.gl.shader.ShaderType;
-import net.coderbot.iris.gl.state.ValueUpdateNotifier;
-import net.coderbot.iris.gl.texture.InternalTextureFormat;
-import net.coderbot.iris.gl.texture.TextureType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.IntSupplier;
-
-public class ProgramBuilder extends ProgramUniforms.Builder implements SamplerHolder, ImageHolder {
+public class ProgramBuilder extends ProgramUniforms.Builder {
 	private final int program;
 	private final ProgramSamplers.Builder samplers;
 	private final ProgramImages.Builder images;
@@ -23,8 +15,8 @@ public class ProgramBuilder extends ProgramUniforms.Builder implements SamplerHo
 		super(name, program);
 
 		this.program = program;
-		this.samplers = ProgramSamplers.builder(program, reservedTextureUnits);
-		this.images = ProgramImages.builder(program);
+		this.samplers = ProgramSamplers.builder(reservedTextureUnits);
+		this.images = ProgramImages.builder();
 	}
 
     public static ProgramBuilder begin(String name, @Nullable String vertexSource, @Nullable String geometrySource,
@@ -69,38 +61,4 @@ public class ProgramBuilder extends ProgramUniforms.Builder implements SamplerHo
 		}
 	}
 
-	@Override
-	public void addExternalSampler(int textureUnit, String... names) {
-		samplers.addExternalSampler(textureUnit, names);
-	}
-
-	@Override
-	public boolean hasSampler(String name) {
-		return samplers.hasSampler(name);
-	}
-
-	@Override
-	public boolean addDefaultSampler(TextureType type, IntSupplier texture, ValueUpdateNotifier notifier, GlSampler sampler, String... names) {
-		return samplers.addDefaultSampler(type, texture, notifier, sampler, names);
-	}
-
-	@Override
-	public boolean addDynamicSampler(TextureType type, IntSupplier texture, GlSampler sampler, String... names) {
-		return samplers.addDynamicSampler(type, texture, sampler, names);
-	}
-
-	@Override
-	public boolean addDynamicSampler(TextureType type, IntSupplier texture, ValueUpdateNotifier notifier, GlSampler sampler, String... names) {
-		return samplers.addDynamicSampler(type, texture, notifier, sampler, names);
-	}
-
-	@Override
-	public boolean hasImage(String name) {
-		return images.hasImage(name);
-	}
-
-	@Override
-	public void addTextureImage(IntSupplier textureID, InternalTextureFormat internalFormat, String name) {
-		images.addTextureImage(textureID, internalFormat, name);
-	}
 }

@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
-import java.util.function.Supplier;
 
 import net.coderbot.iris.Iris;
 import net.coderbot.iris.gl.state.ValueUpdateNotifier;
@@ -22,7 +21,6 @@ import net.coderbot.iris.gl.uniform.UniformUpdateFrequency;
 import net.coderbot.iris.uniforms.SystemTimeUniforms;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
-import org.joml.Vector3i;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.ARBShaderImageLoadStore;
 import org.lwjgl.opengl.GL11;
@@ -111,13 +109,7 @@ public class ProgramUniforms {
 		}
 	}
 
-	public static void clearActiveUniforms() {
-		if (active != null) {
-			active.removeListeners();
-		}
-	}
-
-	public static Builder builder(String name, int program) {
+    public static Builder builder(String name, int program) {
 		return new Builder(name, program);
 	}
 
@@ -200,51 +192,12 @@ public class ProgramUniforms {
 					continue;
 				}
 
-				final int size = sizeType.get(0);
-				final int type = sizeType.get(1);
+                final int type = sizeType.get(1);
 
 				final UniformType provided = uniformNames.get(name);
                 final UniformType expected = getExpectedType(type);
 
-				if(AngelicaConfig.enableHardcodedCustomUniforms) {
-					// Legacy Checks from hardcoded custom uniforms
-					if (provided == null && !name.startsWith("gl_")) {
-						final String typeName = getTypeName(type);
-
-						if (isSampler(type) || isImage(type)) {
-							// don't print a warning, samplers and images are managed elsewhere.
-							continue;
-						}
-
-						final UniformType externalProvided = externalUniformNames.get(name);
-
-						if (externalProvided != null) {
-							if (externalProvided != expected) {
-								final String expectedName;
-
-								if (expected != null) {
-									expectedName = expected.toString();
-								} else {
-									expectedName = "(unsupported type: " + getTypeName(type) + ")";
-								}
-
-								Iris.logger.error("[" + this.name + "] Wrong uniform type for externally-managed uniform " + name + ": " + externalProvided + " is provided but the program expects " + expectedName + ".");
-							}
-
-							continue;
-						}
-
-						if (size == 1) {
-							Iris.logger.warn("[" + this.name + "] Unsupported uniform: " + typeName + " " + name);
-						} else {
-							Iris.logger.warn("[" + this.name + "] Unsupported uniform: " + name + " of size " + size + " and type " + typeName);
-						}
-
-						continue;
-					}
-				}
-
-				if (provided != null && provided != expected) {
+                if (provided != null && provided != expected) {
 					String expectedName;
 
 					if (expected != null) {
@@ -267,7 +220,7 @@ public class ProgramUniforms {
 		}
 
 		@Override
-		public Builder addDynamicUniform(Uniform uniform, ValueUpdateNotifier notifier) {
+		public void addDynamicUniform(Uniform uniform, ValueUpdateNotifier notifier) {
 			Objects.requireNonNull(uniform);
             if(notifier == null){
                 Iris.logger.info("notifier is null: " + uniform.getLocation());
@@ -278,8 +231,7 @@ public class ProgramUniforms {
 			dynamic.put(locations.get(uniform.getLocation()), uniform);
 			notifiersToReset.add(notifier);
 
-			return this;
-		}
+        }
 
         @Override
 		public UniformHolder externallyManagedUniform(String name, UniformType type) {
@@ -318,49 +270,19 @@ public class ProgramUniforms {
 	private static UniformType getExpectedType(int type) {
         return switch (type) {
             case GL11.GL_FLOAT -> UniformType.FLOAT;
-            case GL11.GL_INT -> UniformType.INT;
-            case GL20.GL_BOOL -> UniformType.INT;
+            case GL11.GL_INT, GL20.GL_BOOL, GL20.GL_SAMPLER_3D, GL20.GL_SAMPLER_2D, GL30.GL_UNSIGNED_INT_SAMPLER_2D,
+                 GL30.GL_UNSIGNED_INT_SAMPLER_3D, GL20.GL_SAMPLER_1D, GL20.GL_SAMPLER_1D_SHADOW,
+                 GL20.GL_SAMPLER_2D_SHADOW -> UniformType.INT;
             case GL20.GL_FLOAT_MAT4 -> UniformType.MAT4;
             case GL20.GL_FLOAT_VEC4 -> UniformType.VEC4;
             case GL20.GL_INT_VEC4 -> UniformType.VEC4I;
             case GL20.GL_FLOAT_VEC3 -> UniformType.VEC3;
             case GL20.GL_FLOAT_MAT3 -> UniformType.MAT3;
             case GL20.GL_INT_VEC3 -> UniformType.VEC3I;
-            case GL20.GL_FLOAT_MAT2 -> null;
             case GL20.GL_FLOAT_VEC2 -> UniformType.VEC2;
             case GL20.GL_INT_VEC2 -> UniformType.VEC2I;
-            case GL20.GL_SAMPLER_3D -> UniformType.INT;
-            case GL20.GL_SAMPLER_2D -> UniformType.INT;
-            case GL30.GL_UNSIGNED_INT_SAMPLER_2D -> UniformType.INT;
-            case GL30.GL_UNSIGNED_INT_SAMPLER_3D -> UniformType.INT;
-            case GL20.GL_SAMPLER_1D -> UniformType.INT;
-            case GL20.GL_SAMPLER_2D_SHADOW -> UniformType.INT;
-            case GL20.GL_SAMPLER_1D_SHADOW -> UniformType.INT;
             default -> null;
         };
 	}
 
-	private static boolean isSampler(int type) {
-		return type == GL20.GL_SAMPLER_1D
-				|| type == GL20.GL_SAMPLER_2D
-				|| type == GL30.GL_UNSIGNED_INT_SAMPLER_2D
-				|| type == GL30.GL_UNSIGNED_INT_SAMPLER_3D
-				|| type == GL20.GL_SAMPLER_3D
-				|| type == GL20.GL_SAMPLER_1D_SHADOW
-				|| type == GL20.GL_SAMPLER_2D_SHADOW;
-	}
-
-	private static boolean isImage(int type) {
-		return type == ARBShaderImageLoadStore.GL_IMAGE_1D
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_2D
-			|| type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_1D
-			|| type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_2D
-			|| type == ARBShaderImageLoadStore.GL_UNSIGNED_INT_IMAGE_3D
-			|| type == ARBShaderImageLoadStore.GL_INT_IMAGE_1D
-			|| type == ARBShaderImageLoadStore.GL_INT_IMAGE_2D
-			|| type == ARBShaderImageLoadStore.GL_INT_IMAGE_3D
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_3D
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_1D_ARRAY
-			|| type == ARBShaderImageLoadStore.GL_IMAGE_2D_ARRAY;
-	}
 }

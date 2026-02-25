@@ -47,10 +47,6 @@ import it.unimi.dsi.fastutil.ints.IntStack;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
-import net.coderbot.iris.gl.blending.AlphaTestStorage;
-import net.coderbot.iris.gl.blending.BlendModeStorage;
-import net.coderbot.iris.gl.blending.DepthColorStorage;
-import net.coderbot.iris.texture.pbr.PBRTextureManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.OpenGlHelper;
 import org.joml.Matrix4d;
@@ -76,6 +72,7 @@ import org.lwjgl.opengl.GL30;
 import org.lwjgl.opengl.GLContext;
 import org.lwjgl.opengl.KHRDebug;
 
+import java.io.Serial;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
@@ -414,10 +411,8 @@ public class GLStateManager {
         final List<IStateStack<?>> stacks = Feature.maskToFeatures(GL11.GL_ALL_ATTRIB_BITS);
         final int size = stacks.size();
 
-        for(int i = 0; i < size; i++) {
-            final IStateStack<?> stack = stacks.get(i);
-
-            while(!stack.isEmpty()) {
+        for (final IStateStack<?> stack : stacks) {
+            while (!stack.isEmpty()) {
                 stack.pop();
             }
         }
@@ -439,6 +434,7 @@ public class GLStateManager {
 
     public static class GLFeatureSet extends IntOpenHashSet {
 
+        @Serial
         private static final long serialVersionUID = 8558779940775721010L;
 
         public GLFeatureSet addFeature(int feature) {
@@ -539,7 +535,7 @@ public class GLStateManager {
 
     public static void assertMainThread() {
         if (Thread.currentThread() != CurrentThread && !runningSplash) {
-            LOGGER.info("Call from not the Current Thread! - " + Thread.currentThread().getName() + " Current thread: " + CurrentThread.getName());
+            LOGGER.info("Call from not the Current Thread! - {} Current thread: {}", Thread.currentThread().getName(), CurrentThread.getName());
         }
     }
 
@@ -877,19 +873,16 @@ public class GLStateManager {
             return;
         }
 
-        switch (pname) {
-            case GL11.GL_COLOR_WRITEMASK -> {
-                params.put((byte) (colorMask.red ? GL11.GL_TRUE : GL11.GL_FALSE));
-                params.put((byte) (colorMask.green ? GL11.GL_TRUE : GL11.GL_FALSE));
-                params.put((byte) (colorMask.blue ? GL11.GL_TRUE : GL11.GL_FALSE));
-                params.put((byte) (colorMask.alpha ? GL11.GL_TRUE : GL11.GL_FALSE));
-            }
-            default -> {
-                if(!HAS_MULTIPLE_SET.contains(pname)) {
-                    params.put(0, (byte) (glGetBoolean(pname) ? GL11.GL_TRUE : GL11.GL_FALSE));
-                } else {
-                    GL11.glGetBoolean(pname, params);
-                }
+        if (pname == GL11.GL_COLOR_WRITEMASK) {
+            params.put((byte) (colorMask.red ? GL11.GL_TRUE : GL11.GL_FALSE));
+            params.put((byte) (colorMask.green ? GL11.GL_TRUE : GL11.GL_FALSE));
+            params.put((byte) (colorMask.blue ? GL11.GL_TRUE : GL11.GL_FALSE));
+            params.put((byte) (colorMask.alpha ? GL11.GL_TRUE : GL11.GL_FALSE));
+        } else {
+            if (!HAS_MULTIPLE_SET.contains(pname)) {
+                params.put(0, (byte) (glGetBoolean(pname) ? GL11.GL_TRUE : GL11.GL_FALSE));
+            } else {
+                GL11.glGetBoolean(pname, params);
             }
         }
     }
@@ -949,14 +942,12 @@ public class GLStateManager {
             case GL30.GL_DRAW_FRAMEBUFFER_BINDING -> drawFramebuffer;
             case GL30.GL_READ_FRAMEBUFFER_BINDING -> readFramebuffer;
 
-            default -> {
-                yield switch (pname) {
-                    case GL11.GL_FOG_MODE -> fogState.getFogMode();
-                    case GL11.GL_LINE_STIPPLE_PATTERN -> lineState.getStipplePattern() & 0xFFFF;
-                    case GL11.GL_LINE_STIPPLE_REPEAT -> lineState.getStippleFactor();
-                    default -> GL11.glGetInteger(pname);
-                };
-            }
+            default -> switch (pname) {
+                case GL11.GL_FOG_MODE -> fogState.getFogMode();
+                case GL11.GL_LINE_STIPPLE_PATTERN -> lineState.getStipplePattern() & 0xFFFF;
+                case GL11.GL_LINE_STIPPLE_REPEAT -> lineState.getStippleFactor();
+                default -> GL11.glGetInteger(pname);
+            };
         };
     }
 
@@ -966,14 +957,13 @@ public class GLStateManager {
             return;
         }
 
-        switch (pname) {
-            case GL11.GL_VIEWPORT -> viewportState.get(params);
-            default -> {
-                if(!HAS_MULTIPLE_SET.contains(pname)) {
-                    params.put(0, glGetInteger(pname));
-                } else {
-                    GL11.glGetInteger(pname, params);
-                }
+        if (pname == GL11.GL_VIEWPORT) {
+            viewportState.get(params);
+        } else {
+            if (!HAS_MULTIPLE_SET.contains(pname)) {
+                params.put(0, glGetInteger(pname));
+            } else {
+                GL11.glGetInteger(pname, params);
             }
         }
     }
@@ -1032,10 +1022,8 @@ public class GLStateManager {
                 params.put((float) viewportState.depthRangeNear);
                 params.put((float) viewportState.depthRangeFar);
             }
-            case GL14.GL_BLEND_COLOR -> {
-                params.put(blendState.getBlendColorR()).put(blendState.getBlendColorG())
-                    .put(blendState.getBlendColorB()).put(blendState.getBlendColorA());
-            }
+            case GL14.GL_BLEND_COLOR -> params.put(blendState.getBlendColorR()).put(blendState.getBlendColorG())
+                .put(blendState.getBlendColorB()).put(blendState.getBlendColorA());
             case GL11.GL_CURRENT_NORMAL -> {
                 final Vector3f normal = ShaderManager.getCurrentNormal();
                 params.put(normal.x).put(normal.y).put(normal.z);
@@ -1104,12 +1092,6 @@ public class GLStateManager {
                 return;
             }
         }
-        if (false) {
-            if (BlendModeStorage.isBlendLocked()) {
-                BlendModeStorage.deferBlendModeToggle(true);
-                return;
-            }
-        }
         blendMode.enable();
     }
 
@@ -1118,12 +1100,6 @@ public class GLStateManager {
         if (mode != RecordMode.NONE) {
             DisplayListManager.recordDisable(GL11.GL_BLEND);
             if (mode == RecordMode.COMPILE) {
-                return;
-            }
-        }
-        if (false) {
-            if (BlendModeStorage.isBlendLocked()) {
-                BlendModeStorage.deferBlendModeToggle(false);
                 return;
             }
         }
@@ -1157,12 +1133,6 @@ public class GLStateManager {
         if (mode != RecordMode.NONE) {
             DisplayListManager.recordBlendFunc(srcFactor, dstFactor, srcFactor, dstFactor);
             if (mode == RecordMode.COMPILE) {
-                return;
-            }
-        }
-        if (false) {
-            if (BlendModeStorage.isBlendLocked()) {
-                BlendModeStorage.deferBlendFunc(srcFactor, dstFactor, srcFactor, dstFactor);
                 return;
             }
         }
@@ -1216,12 +1186,6 @@ public class GLStateManager {
         if (mode != RecordMode.NONE) {
             DisplayListManager.recordBlendFunc(srcRgb, dstRgb, srcAlpha, dstAlpha);
             if (mode == RecordMode.COMPILE) {
-                return;
-            }
-        }
-        if (false) {
-            if (BlendModeStorage.isBlendLocked()) {
-                BlendModeStorage.deferBlendFunc(srcRgb, dstRgb, srcAlpha, dstAlpha);
                 return;
             }
         }
@@ -1306,12 +1270,6 @@ public class GLStateManager {
         if (mode != RecordMode.NONE) {
             DisplayListManager.recordDepthMask(mask);
             if (mode == RecordMode.COMPILE) {
-                return;
-            }
-        }
-        if (false) {
-            if (DepthColorStorage.isDepthColorLocked()) {
-                DepthColorStorage.deferDepthEnable(mask);
                 return;
             }
         }
@@ -1424,7 +1382,7 @@ public class GLStateManager {
 
     public static float i2f(int i) { return ((i - Integer.MIN_VALUE) & 0xFFFFFFFFL) / 4294967295.0F; }
 
-    private static boolean changeColor(float red, float green, float blue, float alpha) {
+    private static void changeColor(float red, float green, float blue, float alpha) {
         // Helper function for glColor*
         final boolean caching = isCachingEnabled();
         if (BYPASS_CACHE || !caching || red != color.getRed() || green != color.getGreen() || blue != color.getBlue() || alpha != color.getAlpha()) {
@@ -1439,9 +1397,7 @@ public class GLStateManager {
                 ImmediateModeRecorder.setColor(red, green, blue, alpha);
             }
             dirtyColorAttrib = true;
-            return true;
         }
-        return false;
     }
 
     private static final Color4 DirtyColor = new Color4(-1.0F, -1.0F, -1.0F, -1.0F);
@@ -1455,12 +1411,6 @@ public class GLStateManager {
         if (mode != RecordMode.NONE) {
             DisplayListManager.recordColorMask(red, green, blue, alpha);
             if (mode == RecordMode.COMPILE) {
-                return;
-            }
-        }
-        if (false) {
-            if (DepthColorStorage.isDepthColorLocked()) {
-                DepthColorStorage.deferColorMask(red, green, blue, alpha);
                 return;
             }
         }
@@ -1515,12 +1465,6 @@ public class GLStateManager {
                 return;
             }
         }
-        if (false) {
-            if (AlphaTestStorage.isAlphaTestLocked()) {
-                AlphaTestStorage.deferAlphaTestToggle(true);
-                return;
-            }
-        }
         alphaTest.enable();
     }
 
@@ -1532,12 +1476,6 @@ public class GLStateManager {
                 return;
             }
         }
-        if (false) {
-            if (AlphaTestStorage.isAlphaTestLocked()) {
-                AlphaTestStorage.deferAlphaTestToggle(false);
-                return;
-            }
-        }
         alphaTest.disable();
     }
 
@@ -1546,12 +1484,6 @@ public class GLStateManager {
         if (mode != RecordMode.NONE) {
             DisplayListManager.recordAlphaFunc(function, reference);
             if (mode == RecordMode.COMPILE) {
-                return;
-            }
-        }
-        if (false) {
-            if (AlphaTestStorage.isAlphaTestLocked()) {
-                AlphaTestStorage.deferAlphaFunc(function, reference);
                 return;
             }
         }
@@ -2172,7 +2104,7 @@ public class GLStateManager {
         final int c = f * ((4 + (f - 1)) / f); // 4 ubytes padded to float alignment = 4
 
         boolean tflag = false, cflag = false, nflag = false;
-        int tcomps = 0, ccomps = 0, vcomps = 0;
+        int tcomps = 0, ccomps = 0, vcomps;
         int ctype = 0;
         final int toffset = 0;
         int coffset = 0;
@@ -2488,7 +2420,7 @@ public class GLStateManager {
                 fogState.getFogColor().set(red, green, blue);
                 fogState.setFogAlpha(param.get(3));
                 fogState.getFogColorBuffer().clear();
-                fogState.getFogColorBuffer().put((FloatBuffer) param.position(0)).flip();
+                fogState.getFogColorBuffer().put(param.position(0)).flip();
                 fragmentGeneration++;
             }
         } else {
@@ -2574,9 +2506,6 @@ public class GLStateManager {
     private static void onDeleteTexture(int id) {
         TextureTracker.INSTANCE.onDeleteTexture(id);
         TextureInfoCache.INSTANCE.onDeleteTexture(id);
-        if (false) {
-            PBRTextureManager.INSTANCE.onDeleteTexture(id);
-        }
 
         // Only update cached texture bindings on main thread
         if (isCachingEnabled()) {
@@ -2717,8 +2646,8 @@ public class GLStateManager {
         // First: restore BooleanStateStack states that were actually modified (fast path)
         // These use lazy copy-on-write with global depth tracking
         final List<IStateStack<?>> modified = modifiedAtDepth[attribDepth];
-        for (int i = 0; i < modified.size(); i++) {
-            modified.get(i).popDepth();
+        for (IStateStack<?> iStateStack : modified) {
+            iStateStack.popDepth();
         }
         modified.clear();
 
@@ -4416,16 +4345,14 @@ public class GLStateManager {
      * Guards against FFP features not supported in core profile.
      * Default: throws UnsupportedOperationException.
      * With {@code -Dangelica.ffp.warnOnUnsupported=true}: warns once per function (diagnostic mode).
-     * @return true (always — caller should skip the GL call)
      */
-    private static boolean guardUnsupportedFFP(String function, String explanation) {
+    private static void guardUnsupportedFFP(String function, String explanation) {
         if (!FFP_WARN_ON_UNSUPPORTED) {
             throw new UnsupportedOperationException(function + ": " + explanation);
         }
         if (warnedFFPFunctions.add(function)) {
             LOGGER.warn("{}: {}", function, explanation, new Throwable("Stack trace"));
         }
-        return true;
     }
 
     /**
@@ -4475,11 +4402,11 @@ public class GLStateManager {
             fragmentGeneration++;
             return;
         }
-        guardTexEnvTarget(target, "glTexEnv");
+        guardTexEnvTarget(target);
     }
 
     public static void glTexEnv(int target, int pname, IntBuffer params) {
-        guardTexEnvTarget(target, "glTexEnv");
+        guardTexEnvTarget(target);
     }
 
     /**
@@ -4508,12 +4435,12 @@ public class GLStateManager {
     /**
      * Guard for buffer glTexEnv variants. glTexEnv is removed in core profile.
      */
-    private static void guardTexEnvTarget(int target, String function) {
+    private static void guardTexEnvTarget(int target) {
         if (target == GL14.GL_TEXTURE_FILTER_CONTROL) {
-            guardUnsupportedFFP(function, "LOD bias via buffer glTexEnv is not supported; use glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, value) instead.");
+            guardUnsupportedFFP("glTexEnv", "LOD bias via buffer glTexEnv is not supported; use glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, value) instead.");
             return;
         }
-        guardUnsupportedFFP(function, TEXENV_COMBINE_MSG);
+        guardUnsupportedFFP("glTexEnv", TEXENV_COMBINE_MSG);
     }
 
     // TexGen generation counter for FFP uniform dirty tracking
