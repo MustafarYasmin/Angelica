@@ -100,11 +100,6 @@ public abstract class BaseOptionElementWidget<T extends OptionMenuElement> exten
 	}
 
 	protected final void tryRenderTooltip(int mouseX, int mouseY, boolean hovered) {
-		if (GuiScreen.isShiftKeyDown()) {
-			renderTooltip(SET_TO_DEFAULT, mouseX, mouseY, hovered);
-		} else if (this.isLabelTrimmed && !this.screen.isDisplayingComment()) {
-			renderTooltip(this.unmodifiedLabel, mouseX, mouseY, hovered);
-		}
 	}
 
 	protected final void renderTooltip(String text, int mouseX, int mouseY, boolean hovered) {

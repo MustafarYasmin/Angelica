@@ -23,11 +23,5 @@ public class IrisApiV0ConfigImpl implements IrisApiConfig {
 		} catch (IOException e) {
 			Iris.logger.error("Error saving configuration file!", e);
 		}
-
-		try {
-			Iris.reload();
-		} catch (IOException e) {
-			Iris.logger.error("Error reloading shader pack while applying changes!", e);
-		}
 	}
 }

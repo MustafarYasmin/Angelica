@@ -80,13 +80,7 @@ public class SodiumOptionsGUI extends ScrollableGuiScreen {
     }
 
     public void setPage(OptionPage page) {
-        if (Iris.enabled && page == shaderPacks) {
-            mc.displayGuiScreen(new ShaderPackScreen(this));
-            return;
-        }
-
         this.currentPage = page;
-
         this.rebuildGUI();
     }
 

@@ -63,18 +63,6 @@ public final class OptionMenuConstructor {
 	}
 
 	static {
-		registerScreen(OptionMenuMainElementScreen.class, screen ->
-				new ElementWidgetScreenData(Iris.getCurrentPackName() + (Iris.isFallback() ? " (fallback)" : ""), false));
-
-		registerScreen(OptionMenuSubElementScreen.class, screen ->
-				new ElementWidgetScreenData(GuiUtil.translateOrDefault(new String(screen.screenId), "screen." + screen.screenId), true));
-
-		registerWidget(OptionMenuBooleanOptionElement.class, BooleanElementWidget::new);
-		registerWidget(OptionMenuProfileElement.class, ProfileElementWidget::new);
-		registerWidget(OptionMenuLinkElement.class, LinkElementWidget::new);
-
-		registerWidget(OptionMenuStringOptionElement.class, element ->
-				element.slider ? new SliderElementWidget(element) : new StringElementWidget(element));
 	}
 
 	public interface WidgetProvider<T extends OptionMenuElement> {

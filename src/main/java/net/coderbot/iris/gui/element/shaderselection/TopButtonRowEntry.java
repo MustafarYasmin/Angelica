@@ -52,7 +52,6 @@ public class TopButtonRowEntry extends BaseEntry {
     public void setShadersEnabled(boolean shadersEnabled) {
         this.shadersEnabled = shadersEnabled;
         this.enableDisableButton.text = getEnableDisableLabel();
-        this.shaderPackSelectionList.getScreen().refreshScreenSwitchButton();
     }
 
     @Override

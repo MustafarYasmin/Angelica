@@ -1,7 +1,5 @@
 package net.coderbot.iris.shaderpack.discovery;
 
-import net.coderbot.iris.Iris;
-
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -18,44 +16,7 @@ public class ShaderpackDirectoryManager {
 		this.root = root;
 	}
 
-	public void copyPackIntoDirectory(String name, Path source) throws IOException {
-		Path target = Iris.getShaderpacksDirectory().resolve(name);
-
-		// Copy the pack file into the shaderpacks folder.
-		Files.copy(source, target);
-		// Zip or other archive files will be copied without issue,
-		// however normal folders will require additional handling below.
-
-		// Manually copy the contents of the pack if it is a folder
-		if (Files.isDirectory(source)) {
-			// Use for loops instead of forEach due to createDirectory throwing an IOException
-			// which requires additional handling when used in a lambda
-
-			// Copy all sub folders, collected as a list in order to prevent issues with non-ordered sets
-			try (Stream<Path> stream = Files.walk(source)) {
-				for (Path p : stream.filter(Files::isDirectory).collect(Collectors.toList())) {
-					Path folder = source.relativize(p);
-
-					if (Files.exists(folder)) {
-						continue;
-					}
-
-					Files.createDirectory(target.resolve(folder));
-				}
-			}
-
-			// Copy all non-folder files
-			try (Stream<Path> stream = Files.walk(source)) {
-				for (Path p : stream.filter(p -> !Files.isDirectory(p)).collect(Collectors.toSet())) {
-					Path file = source.relativize(p);
-
-					Files.copy(p, target.resolve(file));
-				}
-			}
-		}
-	}
-
-	public Collection<String> enumerate() throws IOException {
+    public Collection<String> enumerate() throws IOException {
 		// Make sure the list is sorted since not all OSes sort the list of files in the directory.
 		// Case-insensitive sorting is the most intuitive for the user, but we then sort naturally
 		// afterwards so that we don't alternate cases weirdly in the sorted list.
@@ -71,7 +32,7 @@ public class ShaderpackDirectoryManager {
 		};
 
 		try (Stream<Path> list = Files.list(root)) {
-			return list.filter(Iris::isValidShaderpack)
+			return list.filter(pack -> false)
 				.map(path -> path.getFileName().toString())
 				.sorted(comparator).collect(Collectors.toList());
 		}

@@ -64,10 +64,5 @@ public class TextureFormatLoader {
 	}
 
 	private static void onFormatChange() {
-		try {
-			Iris.reload();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 }

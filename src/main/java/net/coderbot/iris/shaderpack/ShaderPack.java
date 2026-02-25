@@ -24,13 +24,11 @@ import net.coderbot.iris.shaderpack.option.menu.OptionMenuContainer;
 import net.coderbot.iris.shaderpack.option.values.MutableOptionValues;
 import net.coderbot.iris.shaderpack.option.values.OptionValues;
 import net.coderbot.iris.shaderpack.preprocessor.JcppProcessor;
-import net.coderbot.iris.shaderpack.preprocessor.PropertiesPreprocessor;
 import net.coderbot.iris.shaderpack.texture.CustomTextureData;
 import net.coderbot.iris.shaderpack.texture.TextureFilteringData;
 import net.coderbot.iris.shaderpack.texture.TextureStage;
 import net.coderbot.iris.uniforms.custom.CustomUniforms;
 import net.irisshaders.iris.api.v0.IrisApi;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -667,7 +665,7 @@ public class ShaderPack {
      * @return The ProgramSet for this dimension, or base ProgramSet if no override exists
      */
     public ProgramSet getProgramSet(String dimensionName) {
-		int dimensionId = Iris.getCurrentDimensionId();
+        int dimensionId = 0;
 
 		// First, try to find an exact match in the dimension map
 		String folderName = dimensionMap.get(dimensionName);

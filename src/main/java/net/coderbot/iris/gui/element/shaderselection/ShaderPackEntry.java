@@ -27,29 +27,5 @@ public class ShaderPackEntry extends BaseEntry {
 
     @Override
     public void drawEntry(ShaderPackScreen screen, int index, int x, int y, int listWidth, Tessellator tessellator, int mouseX, int mouseY, boolean isMouseOver) {
-        final FontRenderer font = screen.getFontRenderer();
-        final boolean shadersEnabled = shaderPackSelectionList.getTopButtonRow().shadersEnabled;
-
-        int color = 0xFFFFFF;
-        String name = packName;
-        if (font.getStringWidth(name) > this.list.getListWidth() - 3) {
-            name = font.trimStringToWidth(name, this.list.getListWidth() - 8) + "...";
-        }
-
-        if(isMouseOver) {
-            name = EnumChatFormatting.BOLD + name;
-        }
-
-        if(this.isApplied()) {
-            color = 0xFFF263;
-        }
-
-        if(!shadersEnabled && !isMouseOver) {
-            color = 0xA2A2A2;
-        }
-
-
-
-        screen.drawCenteredString(name, (x + listWidth / 2) - 2, y, color);
     }
 }

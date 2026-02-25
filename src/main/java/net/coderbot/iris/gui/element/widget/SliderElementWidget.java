@@ -27,11 +27,6 @@ public class SliderElementWidget extends StringElementWidget {
 			this.renderSlider(x, y, width, height, mouseX, mouseY, tickDelta);
 		}
 
-		if (GuiScreen.isShiftKeyDown()) {
-			renderTooltip(SET_TO_DEFAULT, mouseX, mouseY, hovered);
-		} else if (!this.screen.isDisplayingComment()) {
-			renderTooltip(this.unmodifiedLabel, mouseX, mouseY, hovered);
-		}
 
 		if (this.mouseDown) {
 			// Release if the mouse went off the slider

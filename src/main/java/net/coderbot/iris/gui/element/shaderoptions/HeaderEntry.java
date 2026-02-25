@@ -1,6 +1,5 @@
 package net.coderbot.iris.gui.element.shaderoptions;
 
-import net.coderbot.iris.Iris;
 import net.coderbot.iris.gui.GuiUtil;
 import net.coderbot.iris.gui.NavigationController;
 import net.coderbot.iris.gui.element.IrisElementRow;
@@ -123,13 +122,6 @@ public class HeaderEntry extends BaseEntry {
     }
 
     private boolean resetButtonClicked(IrisElementRow.TextButtonElement button) {
-        if (GuiScreen.isShiftKeyDown()) {
-            Iris.resetShaderPackOptionsOnNextReload();
-            this.screen.applyChanges();
-            GuiUtil.playButtonClickSound();
-
-            return true;
-        }
 
         return false;
     }

@@ -37,8 +37,6 @@ public class ElementRowEntry extends BaseEntry {
             final AbstractElementWidget<?> widget = widgets.get(i);
             final boolean widgetHovered = isMouseOver && (getHoveredWidget(mouseX) == i);
             widget.drawScreen(x + (int) ((singleWidgetWidth + 2) * i), y, (int) singleWidgetWidth, slotHeight + 2, mouseX, mouseY, 0, widgetHovered);
-
-            screen.setElementHoveredStatus(widget, widgetHovered);
         }
     }
 

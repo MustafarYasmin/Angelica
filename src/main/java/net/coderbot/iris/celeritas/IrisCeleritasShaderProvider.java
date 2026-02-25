@@ -24,7 +24,7 @@ public class IrisCeleritasShaderProvider implements IrisShaderProvider {
 
     @Override
     public boolean isShadersEnabled() {
-        return Iris.getCurrentPack().isPresent();
+        return false;
     }
 
     @Override

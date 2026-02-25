@@ -21,7 +21,7 @@ tasks.test {
     val isMacOsArm64 = System.getProperty("os.name").lowercase().contains("mac") &&
         System.getProperty("os.arch") == "aarch64"
     javaLauncher = javaToolchains.launcherFor {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(25)
         if (isMacOsArm64) {
             vendor = JvmVendorSpec.AZUL
         }

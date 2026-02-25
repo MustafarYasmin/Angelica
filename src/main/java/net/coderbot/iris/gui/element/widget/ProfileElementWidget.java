@@ -1,6 +1,5 @@
 package net.coderbot.iris.gui.element.widget;
 
-import net.coderbot.iris.Iris;
 import net.coderbot.iris.gui.GuiUtil;
 import net.coderbot.iris.gui.NavigationController;
 import net.coderbot.iris.gui.screen.ShaderPackScreen;
@@ -72,9 +71,7 @@ public class ProfileElementWidget extends BaseOptionElementWidget<OptionMenuProf
 			return false;
 		}
 
-		Iris.queueShaderPackOptionsFromProfile(this.next);
-
-		return true;
+        return true;
 	}
 
 	@Override
@@ -83,9 +80,7 @@ public class ProfileElementWidget extends BaseOptionElementWidget<OptionMenuProf
 			return false;
 		}
 
-		Iris.queueShaderPackOptionsFromProfile(this.previous);
-
-		return true;
+        return true;
 	}
 
 	@Override
