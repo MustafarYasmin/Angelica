@@ -5,7 +5,8 @@ plugins {
 }
 
 minecraft {
-    //extraRunJvmArguments.add("-Dangelica.enableTestBlocks=true")
+    extraRunJvmArguments.addAll("-Xms8192m", "-Xmx8192m", "-XX:+UseCompactObjectHeaders", "-XX:+UseZGC")
+    extraRunJvmArguments.add("-Dangelica.enableTestBlocks=true")
     //extraRunJvmArguments.add("-Dangelica.dumpClass=true")
 //    extraRunJvmArguments.addAll("-Dlegacy.debugClassLoadingSave=true")
 //    extraRunJvmArguments.addAll("-Drfb.dumpLoadedClasses=true", "-Drfb.dumpLoadedClassesPerTransformer=true")
