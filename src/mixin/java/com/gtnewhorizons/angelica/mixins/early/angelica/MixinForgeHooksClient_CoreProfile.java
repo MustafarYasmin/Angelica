@@ -9,11 +9,12 @@ import org.lwjgl.opengl.PixelFormat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import javax.imageio.ImageIO;
 
 /**
- * Requests a GL 3.3 core profile context
+ * Requests a GL 4.5 or 3.3 core profile context
  */
 @Mixin(value = ForgeHooksClient.class, remap = false)
 public abstract class MixinForgeHooksClient_CoreProfile {
@@ -22,13 +23,16 @@ public abstract class MixinForgeHooksClient_CoreProfile {
 
     /**
      * @author Angelica
-     * @reason Request GL 3.3 core profile context
+     * @reason Request GL 4.5 or 3.3 core profile context
      */
     @Overwrite
     public static void createDisplay() throws LWJGLException {
         ImageIO.setUseCache(false);
         final PixelFormat format = new PixelFormat().withDepthBits(24);
-        final ContextAttribs attribs = new ContextAttribs(3, 3)
+        final ContextAttribs attribs33 = new ContextAttribs(3, 3)
+            .withProfileCore(true)
+            .withForwardCompatible(true);
+        final ContextAttribs attribs46 = new ContextAttribs(4, 6)
             .withProfileCore(true)
             .withForwardCompatible(true);
 
@@ -37,31 +41,46 @@ public abstract class MixinForgeHooksClient_CoreProfile {
 
         if (!wantStencil) {
             try {
-                Display.create(format, attribs);
+                Display.create(format, attribs46);
             } catch (LWJGLException e) {
-                reportContextFailure(e);
-                throw e;
+                try {
+                    Display.create(format, attribs33);
+                } catch (LWJGLException e2) {
+                    angelica$reportContextFailure(e2);
+                    throw e2;
+                }
             }
             stencilBits = 0;
             return;
         }
 
         try {
-            Display.create(format.withStencilBits(8), attribs);
+            Display.create(format.withStencilBits(8), attribs46);
             stencilBits = 8;
         } catch (LWJGLException e) {
             try {
-                Display.create(format, attribs);
+                Display.create(format, attribs46);
                 stencilBits = 0;
             } catch (LWJGLException e2) {
-                reportContextFailure(e2);
-                throw e2;
+                try {
+                    Display.create(format.withStencilBits(8), attribs33);
+                    stencilBits = 8;
+                } catch (LWJGLException e3) {
+                    try {
+                        Display.create(format, attribs33);
+                        stencilBits = 0;
+                    } catch (LWJGLException e4) {
+                        angelica$reportContextFailure(e4);
+                        throw e4;
+                    }
+                }
             }
         }
     }
 
-    private static void reportContextFailure(LWJGLException e) {
-        System.err.println("[Angelica] FATAL: Failed to create OpenGL 3.3 core profile context.");
+    @Unique
+    private static void angelica$reportContextFailure(LWJGLException e) {
+        System.err.println("[Angelica] FATAL: Failed to create OpenGL 4.5 or 3.3 core profile context.");
         System.err.println("[Angelica] Error: " + e.getMessage());
         try {
             System.err.println("[Angelica] GPU: " + GL11.glGetString(GL11.GL_RENDERER) + ", Driver: " + GL11.glGetString(GL11.GL_VERSION));
