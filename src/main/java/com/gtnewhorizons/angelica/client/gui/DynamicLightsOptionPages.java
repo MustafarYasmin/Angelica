@@ -55,7 +55,6 @@ public class DynamicLightsOptionPages {
 
         // Create a group for each mod's entities
         for (Map.Entry<String, List<EntityTypeEntry>> modEntry : byMod.entrySet()) {
-            String modId = modEntry.getKey();
             List<EntityTypeEntry> entities = modEntry.getValue();
 
             OptionGroup.Builder groupBuilder = OptionGroup.createBuilder();
@@ -97,7 +96,7 @@ public class DynamicLightsOptionPages {
             .setControl(TickBoxControl::new)
             .setBinding(
                 (_, value) -> EntityLightConfig.setEntityTypeEnabled(entityClass, value),
-                storage -> EntityLightConfig.isEntityTypeEnabled(entityClass)
+                _ -> EntityLightConfig.isEntityTypeEnabled(entityClass)
             )
             .setImpact(OptionImpact.LOW)
             .build();
